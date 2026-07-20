@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/core/theme/app_theme.dart';
-import 'package:watibot/modules/home/models/dashboard_model.dart';
+import 'package:watibot/modules/home/models/recent_activity_model.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class ActivityTile extends StatelessWidget {
-  final RecentActivity activity;
+  final RecentActivityModel activity;
   final bool isLast;
 
   const ActivityTile({
@@ -52,20 +53,11 @@ class ActivityTile extends StatelessWidget {
   }
 
   String _getActionTitle() {
-    // Map subtitle to an action type based on existing data pattern
-    if (activity.subtitle.toLowerCase().contains('completed')) {
-      return 'Campaign Completed';
-    } else if (activity.subtitle.toLowerCase().contains('contact added')) {
-      return 'New Contact Added';
-    } else if (activity.subtitle.toLowerCase().contains('paused')) {
-      return 'Campaign Paused';
-    }
-    return activity.type.substring(0, 1).toUpperCase() + activity.type.substring(1) + ' Update';
+    return '${activity.module[0].toUpperCase()}${activity.module.substring(1)} ${activity.action}';
   }
 
   String _getDescription() {
-    // Use the actual subtitle as the description text, removing the title if it was embedded
-    return activity.subtitle.replaceAll(activity.title, '').trim();
+    return activity.displaySubtitle;
   }
 
   @override
@@ -132,7 +124,7 @@ class ActivityTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          activity.title,
+                          activity.displayTitle,
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -149,7 +141,9 @@ class ActivityTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          activity.timestamp,
+                          activity.createdAt != null 
+                              ? timeago.format(activity.createdAt!) 
+                              : 'Just now',
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             color: const Color(0xFF94A3B8),

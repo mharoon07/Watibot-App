@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:watibot/modules/home/models/dashboard_model.dart';
+import 'package:watibot/modules/home/models/recent_activity_model.dart';
 import 'package:watibot/modules/home/widgets/activity_tile.dart';
 
 class RecentActivityCard extends StatelessWidget {
-  final List<RecentActivity> activities;
+  final List<RecentActivityModel> activities;
 
   const RecentActivityCard({super.key, required this.activities});
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import 'package:watibot/core/services/storage_service.dart';
+import 'package:watibot/modules/auth/routes/auth_routes.dart';
 import 'package:watibot/modules/more/widgets/more_menu_tile.dart';
 import 'package:watibot/modules/more/widgets/more_profile_card.dart';
 import 'package:watibot/modules/more/widgets/more_section_header.dart';
@@ -207,7 +210,10 @@ class MoreView extends StatelessWidget {
                   icon: Icons.logout_outlined,
                   color: const Color(0xFFDC2626),
                   isDestructive: true,
-                  onTap: () {},
+                  onTap: () async {
+                    await Get.find<StorageService>().clearAll();
+                    Get.offAllNamed(AuthRoutes.login);
+                  },
                 ),
               ]),
 

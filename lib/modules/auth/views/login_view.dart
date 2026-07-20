@@ -182,29 +182,29 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 24),
             _buildSocialLogin(context),
             const SizedBox(height: 24),
-            Center(
-              child: GestureDetector(
-                onTap: controller.goToRegister,
-                child: RichText(
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                    children: const [
-                      TextSpan(text: 'Don\'t have an account? '),
-                      TextSpan(
-                        text: 'Create Account',
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Center(
+            //   child: GestureDetector(
+            //     onTap: controller.goToRegister,
+            //     child: RichText(
+            //       text: TextSpan(
+            //         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            //               color: const Color(0xFF64748B),
+            //               fontWeight: FontWeight.w500,
+            //             ),
+            //         children: const [
+            //           TextSpan(text: 'Don\'t have an account? '),
+            //           TextSpan(
+            //             text: 'Create Account',
+            //             style: TextStyle(
+            //               color: AppTheme.primaryColor,
+            //               fontWeight: FontWeight.w700,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

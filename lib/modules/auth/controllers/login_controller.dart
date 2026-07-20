@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:watibot/core/services/api_service.dart';
 import 'package:watibot/modules/auth/models/login_model.dart';
 import 'package:watibot/modules/auth/repositories/auth_repository.dart';
 import 'package:watibot/modules/auth/routes/auth_routes.dart';
@@ -71,6 +72,14 @@ class LoginController extends GetxController {
           colorText: Colors.red.shade900,
         );
       }
+    } on ApiException catch (e) {
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
     } catch (e) {
       Get.snackbar(
         'Error',

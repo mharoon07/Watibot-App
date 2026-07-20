@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/core/theme/app_theme.dart';
-import 'package:watibot/modules/home/models/dashboard_model.dart';
+import 'package:watibot/core/theme/app_theme.dart';
 
 class StatsCard extends StatefulWidget {
-  final Statistic statistic;
+  final String title;
+  final String value;
+  final double trend;
+  final String iconCode;
   final int index;
 
   const StatsCard({
     super.key,
-    required this.statistic,
+    required this.title,
+    required this.value,
+    required this.trend,
+    required this.iconCode,
     required this.index,
   });
 
@@ -80,9 +86,9 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    final isPositive = widget.statistic.trend >= 0;
-    final trendColor = isPositive ? AppTheme.primaryColor : Colors.redAccent;
-    final iconColor = _getIconColor(widget.statistic.iconCode);
+    final isPositive = widget.trend >= 0;
+    final trendColor = isPositive ? AppTheme.successColor : AppTheme.errorColor;
+    final iconColor = _getIconColor(widget.iconCode);
 
     return MouseRegion(
       onEnter: (_) {
@@ -137,7 +143,7 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        _getIconData(widget.statistic.iconCode),
+                        _getIconData(widget.iconCode),
                         color: iconColor,
                         size: 16,
                       ),
@@ -151,7 +157,7 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
                         ),
                         const SizedBox(width: 2),
                         Text(
-                          '${widget.statistic.trend.abs()}%',
+                          '${widget.trend.abs()}%',
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -164,7 +170,7 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  widget.statistic.value,
+                  widget.value,
                   style: GoogleFonts.inter(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -172,13 +178,11 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
-                  widget.statistic.title,
+                  widget.title,
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
+                    color: AppTheme.textSecondary,
                   ),
                 ),
               ],

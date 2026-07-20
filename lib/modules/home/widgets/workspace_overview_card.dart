@@ -3,12 +3,23 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/modules/home/widgets/workspace_progress_bar.dart';
 import 'package:watibot/modules/home/widgets/workspace_status_chip.dart';
+import 'package:watibot/modules/home/models/workspace_status_model.dart';
+import 'package:watibot/modules/home/models/usage_overview_model.dart';
 
 class WorkspaceOverviewCard extends StatelessWidget {
-  const WorkspaceOverviewCard({super.key});
+  final WorkspaceStatusModel? workspaceStatus;
+  final UsageOverviewModel? usageOverview;
+
+  const WorkspaceOverviewCard({
+    super.key,
+    this.workspaceStatus,
+    this.usageOverview,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (workspaceStatus == null) return const SizedBox.shrink();
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -28,8 +39,10 @@ class WorkspaceOverviewCard extends StatelessWidget {
         children: [
           _buildHeader(),
           _buildGrid(),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          _buildUsageOverview(),
+          if (usageOverview != null && usageOverview!.resources.isNotEmpty) ...[
+            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            _buildUsageOverview(),
+          ],
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
           _buildFooter(),
         ],
@@ -59,20 +72,27 @@ class WorkspaceOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Your WhatsApp Business account overview',
+                  workspaceStatus!.name,
                   style: GoogleFonts.inter(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: const Color(0xFF64748B),
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF94A3B8), size: 20),
-            tooltip: 'Refresh Status',
-            splashRadius: 20,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
+            ),
+            child: const Icon(
+              Icons.business_center_outlined,
+              color: Color(0xFF64748B),
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -81,7 +101,7 @@ class WorkspaceOverviewCard extends StatelessWidget {
 
   Widget _buildGrid() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
       child: Column(
         children: [
           IntrinsicHeight(
@@ -90,24 +110,37 @@ class WorkspaceOverviewCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildGridTile(
-                    title: 'Quality Rating',
-                    content: const WorkspaceStatusChip(
-                      text: 'UNKNOWN',
-                      color: Color(0xFF94A3B8), // Grey
+                    title: 'WhatsApp API',
+                    content: WorkspaceStatusChip(
+                      text: workspaceStatus!.whatsappConnected ? 'LIVE' : 'OFFLINE',
+                      color: workspaceStatus!.whatsappConnected ? const Color(0xFF25D366) : const Color(0xFF94A3B8),
+                      isPulsing: workspaceStatus!.whatsappConnected,
                     ),
-                    description: 'No rating data available yet',
+                    description: workspaceStatus!.whatsappConnected ? 'Connected successfully' : 'Not connected',
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildGridTile(
-                    title: 'WhatsApp API',
-                    content: const WorkspaceStatusChip(
-                      text: 'LIVE',
-                      color: Color(0xFF25D366), // WatiBot Green
-                      isPulsing: true,
+                    title: 'Current Plan',
+                    content: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Text(
+                        workspaceStatus!.plan.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF475569),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
-                    description: 'Connected successfully',
+                    description: 'Active Subscription',
                   ),
                 ),
               ],
@@ -120,37 +153,13 @@ class WorkspaceOverviewCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildGridTile(
-                    title: 'Current Plan',
-                    content: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Text(
-                        'FREE',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF475569),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    description: 'Forever Free',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildGridTile(
                     title: 'Phone Number',
                     content: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
                           child: Text(
-                            '+92 328 988 9675',
+                            workspaceStatus!.whatsappNumber ?? 'N/A',
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -160,14 +169,16 @@ class WorkspaceOverviewCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.verified, color: Color(0xFF25D366), size: 14),
+                        if (workspaceStatus!.whatsappNumber != null) ...[
+                          const SizedBox(width: 4),
+                          const Icon(Icons.verified, color: Color(0xFF25D366), size: 14),
+                        ]
                       ],
                     ),
-                    description: 'Verified business account',
-                    onTapCopy: () {
-                      Clipboard.setData(const ClipboardData(text: '+923289889675'));
-                    },
+                    description: workspaceStatus!.whatsappNumber != null ? 'Verified account' : 'No number',
+                    onTapCopy: workspaceStatus!.whatsappNumber != null ? () {
+                      Clipboard.setData(ClipboardData(text: workspaceStatus!.whatsappNumber!));
+                    } : null,
                   ),
                 ),
               ],
@@ -236,35 +247,39 @@ class WorkspaceOverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Usage Overview',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF0F172A),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Usage Overview',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+              Text(
+                '${usageOverview!.percentage}% used',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          const WorkspaceProgressBar(
-            label: 'Conversations',
-            current: 68,
-            max: 250,
-            color: Color(0xFF25D366), // WatiBot Green
-          ),
-          const SizedBox(height: 12),
-          const WorkspaceProgressBar(
-            label: 'Templates',
-            current: 15,
-            max: 50,
-            color: Color(0xFF25D366),
-          ),
-          const SizedBox(height: 12),
-          const WorkspaceProgressBar(
-            label: 'Broadcasts',
-            current: 3,
-            max: 10,
-            color: Color(0xFF25D366),
-          ),
+          ...usageOverview!.resources.take(3).map((resource) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: WorkspaceProgressBar(
+                label: resource.name,
+                current: resource.used,
+                max: resource.limit <= 0 ? resource.used + 1 : resource.limit,
+                color: const Color(0xFF25D366),
+              ),
+            );
+          }).toList(),
         ],
       ),
     );
@@ -276,15 +291,14 @@ class WorkspaceOverviewCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < 250) {
-            // Stack vertically on very small screens
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildFooterStat('Connected Since', 'Jan 2025'),
-                    _buildFooterStat('Last Sync', '2 mins ago'),
+                    _buildFooterStat('Project ID', workspaceStatus!.id.substring(0, 8)),
+                    _buildFooterStat('Timezone', workspaceStatus!.timezone),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -293,7 +307,6 @@ class WorkspaceOverviewCard extends StatelessWidget {
             );
           }
 
-          // Horizontal row for normal screens
           return Row(
             children: [
               Expanded(
@@ -301,8 +314,8 @@ class WorkspaceOverviewCard extends StatelessWidget {
                   spacing: 24,
                   runSpacing: 8,
                   children: [
-                    _buildFooterStat('Connected Since', 'Jan 2025'),
-                    _buildFooterStat('Last Sync', '2 mins ago'),
+                    _buildFooterStat('Project ID', workspaceStatus!.id.substring(0, 8)),
+                    _buildFooterStat('Timezone', workspaceStatus!.timezone),
                   ],
                 ),
               ),

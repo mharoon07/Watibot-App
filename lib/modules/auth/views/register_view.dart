@@ -166,6 +166,118 @@ class RegisterView extends GetView<RegisterController> {
                   ),
                 )),
             const SizedBox(height: 20),
+            Text(
+              'Verification Method',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Obx(() => Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => controller.setVerificationMethod('email'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: controller.verificationMethod.value == 'email'
+                                  ? AppTheme.primaryColor
+                                  : Colors.grey.shade300,
+                              width: controller.verificationMethod.value == 'email' ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: controller.verificationMethod.value == 'email'
+                                ? AppTheme.primaryColor.withOpacity(0.05)
+                                : Colors.transparent,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.email_outlined,
+                                color: controller.verificationMethod.value == 'email'
+                                    ? AppTheme.primaryColor
+                                    : Colors.grey.shade600,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Email',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  color: controller.verificationMethod.value == 'email'
+                                      ? AppTheme.primaryColor
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => controller.setVerificationMethod('phone'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: controller.verificationMethod.value == 'phone'
+                                  ? AppTheme.primaryColor
+                                  : Colors.grey.shade300,
+                              width: controller.verificationMethod.value == 'phone' ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: controller.verificationMethod.value == 'phone'
+                                ? AppTheme.primaryColor.withOpacity(0.05)
+                                : Colors.transparent,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.chat_outlined, // WhatsApp like
+                                color: controller.verificationMethod.value == 'phone'
+                                    ? AppTheme.primaryColor
+                                    : Colors.grey.shade600,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'WhatsApp',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  color: controller.verificationMethod.value == 'phone'
+                                      ? AppTheme.primaryColor
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )),
+            Obx(() => controller.verificationMethod.value == 'phone'
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: AuthTextField(
+                      label: 'Phone Number (WhatsApp)',
+                      hint: '+1 234 567 8900',
+                      leadingIcon: Icons.phone_outlined,
+                      controller: controller.phoneController,
+                      focusNode: controller.phoneFocus,
+                      keyboardType: TextInputType.phone,
+                    ),
+                  )
+                : const SizedBox.shrink()),
+            const SizedBox(height: 20),
             Obx(() => AuthCheckbox(
                   value: controller.agreeTerms.value,
                   onChanged: controller.toggleTerms,

@@ -28,18 +28,18 @@ class AppValidators {
     if (value.length < 8) {
       return 'Minimum 8 characters required';
     }
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Must contain at least one uppercase letter';
-    }
+    // if (!RegExp(r'[A-Z]').hasMatch(value)) {
+    //   return 'Must contain at least one uppercase letter';
+    // }
     if (!RegExp(r'[a-z]').hasMatch(value)) {
       return 'Must contain at least one lowercase letter';
     }
-    if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Must contain at least one number';
-    }
-    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
-      return 'Must contain at least one special character';
-    }
+    // if (!RegExp(r'[0-9]').hasMatch(value)) {
+    //   return 'Must contain at least one number';
+    // }
+    // if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
+    //   return 'Must contain at least one special character';
+    // }
     return null;
   }
 }

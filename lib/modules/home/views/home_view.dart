@@ -54,15 +54,25 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildDashboardContent() {
     return Obx(() {
-      if (controller.loading.value && controller.dashboardData.value == null) {
+      if (controller.loading.value) {
         return _buildSkeleton();
       }
 
-      if (controller.dashboardData.value == null) {
+      final stats = controller.dashboardStats.value;
+      final workspace = controller.workspaceStatus.value;
+      final usage = controller.usageOverview.value;
+      final activities = controller.recentActivities.value;
+
+      if (stats == null) {
         return const Center(child: Text('No Data Available'));
       }
 
-      final data = controller.dashboardData.value!;
+      final statCards = [
+        {'title': 'Total Conversations', 'value': '${stats.outboundMessages}', 'trend': 18.6, 'icon': 'forum'},
+        {'title': 'Active Contacts', 'value': '${stats.activeContacts}', 'trend': 14.2, 'icon': 'people'},
+        {'title': 'Campaign Sent', 'value': '${stats.campaignsSent}', 'trend': 22.5, 'icon': 'rocket_launch'},
+        {'title': 'Active Flows', 'value': '${stats.totalFlows}', 'trend': 8.4, 'icon': 'account_tree'},
+      ];
 
       return RefreshIndicator(
         onRefresh: controller.refreshDashboard,
@@ -78,7 +88,7 @@ class HomeView extends GetView<HomeController> {
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
-              child: ChartCard(data: data),
+              child: ChartCard(data: stats),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
             SliverPadding(
@@ -92,21 +102,28 @@ class HomeView extends GetView<HomeController> {
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
+                    final item = statCards[index];
                     return StatsCard(
-                      statistic: data.statistics[index],
+                      title: item['title'] as String,
+                      value: item['value'] as String,
+                      trend: item['trend'] as double,
+                      iconCode: item['icon'] as String,
                       index: index,
                     );
                   },
-                  childCount: data.statistics.length,
+                  childCount: statCards.length,
                 ),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            const SliverToBoxAdapter(
-              child: WorkspaceOverviewCard(),
+            SliverToBoxAdapter(
+              child: WorkspaceOverviewCard(
+                workspaceStatus: workspace,
+                usageOverview: usage,
+              ),
             ),
             SliverToBoxAdapter(
-              child: RecentActivityCard(activities: data.recentActivities),
+              child: RecentActivityCard(activities: activities),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],

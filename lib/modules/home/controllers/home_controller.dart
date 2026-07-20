@@ -1,15 +1,22 @@
 import 'package:get/get.dart';
-import 'package:watibot/modules/home/models/dashboard_model.dart';
+import 'package:watibot/modules/home/models/dashboard_stats_model.dart';
+import 'package:watibot/modules/home/models/recent_activity_model.dart';
+import 'package:watibot/modules/home/models/usage_overview_model.dart';
+import 'package:watibot/modules/home/models/workspace_status_model.dart';
 import 'package:watibot/modules/home/repositories/home_repository.dart';
+import 'package:watibot/core/services/api_service.dart';
 
 class HomeController extends GetxController {
   final HomeRepository _repository;
 
   HomeController(this._repository);
-
-  final Rx<DashboardModel?> dashboardData = Rx<DashboardModel?>(null);
   final loading = true.obs;
   final selectedTab = 0.obs;
+
+  final Rx<DashboardStatsModel?> dashboardStats = Rx<DashboardStatsModel?>(null);
+  final Rx<WorkspaceStatusModel?> workspaceStatus = Rx<WorkspaceStatusModel?>(null);
+  final Rx<UsageOverviewModel?> usageOverview = Rx<UsageOverviewModel?>(null);
+  final Rx<List<RecentActivityModel>> recentActivities = Rx<List<RecentActivityModel>>([]);
 
   @override
   void onInit() {
@@ -20,10 +27,13 @@ class HomeController extends GetxController {
   Future<void> loadDashboard() async {
     loading.value = true;
     try {
-      final data = await _repository.getDashboardData();
-      dashboardData.value = data;
+      await Future.wait([
+        loadDashboardData(),
+        loadUsage(),
+        loadRecentActivities(),
+      ]);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load dashboard data');
+      Get.snackbar('Error', 'Failed to load dashboard data fully');
     } finally {
       loading.value = false;
     }
@@ -31,18 +41,46 @@ class HomeController extends GetxController {
 
   Future<void> refreshDashboard() async {
     try {
-      final data = await _repository.getDashboardData();
-      dashboardData.value = data;
+      await Future.wait([
+        loadDashboardData(),
+        loadUsage(),
+        loadRecentActivities(),
+      ]);
     } catch (e) {
       Get.snackbar('Error', 'Failed to refresh dashboard data');
+    }
+  }
+
+  Future<void> loadDashboardData() async {
+    try {
+      final rawData = await _repository.getDashboardData();
+      dashboardStats.value = DashboardStatsModel.fromJson(rawData['dashboard'] ?? {});
+      workspaceStatus.value = WorkspaceStatusModel.fromJson(rawData['project'] ?? {});
+    } catch (e) {
+      print('Failed to load dashboard data: $e');
+    }
+  }
+
+  Future<void> loadUsage() async {
+    try {
+      usageOverview.value = await _repository.getUsageOverview();
+    } catch (e) {
+      print('Failed to load usage overview: $e');
+    }
+  }
+
+  Future<void> loadRecentActivities() async {
+    try {
+      recentActivities.value = await _repository.getRecentActivities();
+    } catch (e) {
+      print('Failed to load recent activities: $e');
     }
   }
 
   void changeTab(int index) {
     if (index == selectedTab.value) return;
     selectedTab.value = index;
-    // In a real app, you would navigate or change views based on tab
-  }
+   }
 
   void openNotifications() {
     Get.snackbar('Notifications', 'No new notifications');

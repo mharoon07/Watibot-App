@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/core/theme/app_theme.dart';
-import 'package:watibot/modules/home/models/dashboard_model.dart';
+import 'package:watibot/modules/home/models/dashboard_stats_model.dart';
 import 'dart:ui' as ui;
 
 class ChartCard extends StatelessWidget {
-  final DashboardModel data;
+  final DashboardStatsModel data;
 
   const ChartCard({super.key, required this.data});
 
