@@ -24,7 +24,7 @@ class ActivityTile extends StatelessWidget {
       case 'broadcast':
         return Icons.campaign;
       case 'agent':
-        return Icons.pause_circle_outline;
+        return Icons.smart_toy;
       case 'payment':
         return Icons.payment;
       default:
@@ -35,97 +35,135 @@ class ActivityTile extends StatelessWidget {
   Color _getColor() {
     switch (activity.type) {
       case 'campaign':
-        return AppTheme.primaryColor;
+        return const Color(0xFF25D366); // Green
       case 'contact':
-        return Colors.blue;
+        return const Color(0xFF3B82F6); // Blue
       case 'flow':
-        return Colors.purple;
+        return const Color(0xFF6366F1); // Indigo
       case 'broadcast':
-        return Colors.orange;
+        return const Color(0xFFF59E0B); // Orange
       case 'agent':
-        return Colors.redAccent;
+        return const Color(0xFF8B5CF6); // Purple
       case 'payment':
-        return Colors.green;
+        return const Color(0xFF10B981); // Emerald
       default:
-        return const Color(0xFF64748B);
+        return const Color(0xFF64748B); // Slate
     }
+  }
+
+  String _getActionTitle() {
+    // Map subtitle to an action type based on existing data pattern
+    if (activity.subtitle.toLowerCase().contains('completed')) {
+      return 'Campaign Completed';
+    } else if (activity.subtitle.toLowerCase().contains('contact added')) {
+      return 'New Contact Added';
+    } else if (activity.subtitle.toLowerCase().contains('paused')) {
+      return 'Campaign Paused';
+    }
+    return activity.type.substring(0, 1).toUpperCase() + activity.type.substring(1) + ' Update';
+  }
+
+  String _getDescription() {
+    // Use the actual subtitle as the description text, removing the title if it was embedded
+    return activity.subtitle.replaceAll(activity.title, '').trim();
   }
 
   @override
   Widget build(BuildContext context) {
     final color = _getColor();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _getIcon(),
-                  color: color,
-                  size: 16,
-                ),
-              ),
-              if (!isLast)
-                Container(
-                  width: 2,
-                  height: 32,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  color: AppTheme.borderColor,
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {},
+        borderRadius: BorderRadius.circular(8),
+        splashColor: color.withOpacity(0.1),
+        highlightColor: color.withOpacity(0.05),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 2),
-                RichText(
-                  text: TextSpan(
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: const Color(0xFF475569),
-                    ),
+                // Timeline Column
+                SizedBox(
+                  width: 40,
+                  child: Column(
                     children: [
-                      TextSpan(text: activity.subtitle.replaceAll(activity.title, '')),
-                      TextSpan(
-                        text: ' ${activity.title} ',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _getIcon(),
+                          color: color,
+                          size: 20,
                         ),
                       ),
-                      if (activity.subtitle.contains('completed') || activity.subtitle.contains('paused'))
-                        TextSpan(
-                          text: activity.subtitle.split(activity.title).last.trim(),
+                      if (!isLast)
+                        Expanded(
+                          child: Container(
+                            width: 2,
+                            color: const Color(0xFFE2E8F0), // Subtle connector
+                          ),
                         ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  activity.timestamp,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: const Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: 16),
+                // Content Column
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: isLast ? 8 : 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getActionTitle(),
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF0F172A),
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          activity.title,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _getDescription(),
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          activity.timestamp,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF94A3B8),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                if (!isLast) const SizedBox(height: 16),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

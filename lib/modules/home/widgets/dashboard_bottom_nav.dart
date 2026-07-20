@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:watibot/core/theme/app_theme.dart';
 
 class DashboardBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -15,65 +14,71 @@ class DashboardBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 24,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
             offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavItem(0, 'Home', Icons.home_filled),
-          _buildNavItem(1, 'Inbox', Icons.chat_bubble_outline),
-          _buildNavItem(2, 'Campaigns', Icons.rocket_launch_outlined),
-          _buildNavItem(3, 'Contacts', Icons.people_outline),
-          _buildNavItem(4, 'More', Icons.menu_rounded),
+          _buildNavItem(0, 'Home', Icons.home_filled, Icons.home_outlined),
+          _buildNavItem(1, 'Inbox', Icons.chat_bubble, Icons.chat_bubble_outline),
+          _buildNavItem(2, 'Campaigns', Icons.rocket_launch, Icons.rocket_launch_outlined),
+          _buildNavItem(3, 'Contacts', Icons.people, Icons.people_outline),
+          _buildNavItem(4, 'More', Icons.menu_rounded, Icons.menu_rounded),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(int index, String label, IconData icon) {
+  Widget _buildNavItem(int index, String label, IconData activeIcon, IconData inactiveIcon) {
     final isSelected = selectedIndex == index;
 
     return GestureDetector(
       onTap: () => onItemSelected(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
         padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 12 : 8,
-          vertical: 6,
+          horizontal: isSelected ? 16 : 10,
+          vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+          color: isSelected ? const Color(0xFFDCFCE7) : Colors.transparent, // Very light green
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
-              size: 22,
+              isSelected ? activeIcon : inactiveIcon,
+              color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+              size: 24,
             ),
             if (isSelected) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: const Color(0xFF16A34A),
+                  letterSpacing: -0.2,
                 ),
               ),
             ],

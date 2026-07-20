@@ -6,11 +6,13 @@ import 'package:watibot/modules/home/widgets/dashboard_header.dart';
 import 'package:watibot/modules/home/widgets/chart_card.dart';
 import 'package:watibot/modules/home/widgets/stats_card.dart';
 import 'package:watibot/modules/home/widgets/activity_tile.dart';
-import 'package:watibot/modules/home/widgets/dashboard_section.dart';
 import 'package:watibot/modules/home/widgets/dashboard_bottom_nav.dart';
+import 'package:watibot/modules/home/widgets/recent_activity_card.dart';
+import 'package:watibot/modules/home/widgets/workspace_overview_card.dart';
 import 'package:watibot/modules/inbox/views/inbox_view.dart';
 import 'package:watibot/modules/campaigns/views/campaigns_view.dart';
 import 'package:watibot/modules/contacts/views/contacts_view.dart';
+import 'package:watibot/modules/more/views/more_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -31,6 +33,7 @@ class HomeView extends GetView<HomeController> {
               const InboxView(),
               const CampaignsView(),
               const ContactsView(),
+              const MoreView(),
             ],
           )),
           Positioned(
@@ -98,20 +101,12 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(
+              child: WorkspaceOverviewCard(),
+            ),
             SliverToBoxAdapter(
-              child: DashboardSection(
-                title: 'Recent Activity',
-                actionTitle: 'View All',
-                onActionTap: () {},
-                child: Column(
-                  children: data.recentActivities.asMap().entries.map((entry) {
-                    return ActivityTile(
-                      activity: entry.value,
-                      isLast: entry.key == data.recentActivities.length - 1,
-                    );
-                  }).toList(),
-                ),
-              ),
+              child: RecentActivityCard(activities: data.recentActivities),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
