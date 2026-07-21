@@ -42,4 +42,32 @@ class HomeRepository {
     }
     throw Exception('Failed to load recent activities');
   }
+
+  Future<Map<String, dynamic>> getPaginatedActivities({int page = 1, int limit = 20}) async {
+    final response = await _api.get('/activity-log', queryParameters: {'page': page, 'limit': limit});
+    if (response.statusCode == 200 && response.data['success'] == true) {
+      final logsData = response.data['logs'] as List<dynamic>? ?? [];
+      final logs = logsData.map((e) => RecentActivityModel.fromJson(e)).toList();
+      return {
+        'logs': logs,
+        'totalPages': response.data['total_pages'] ?? 1,
+        'total': response.data['total'] ?? 0,
+      };
+    }
+    throw Exception('Failed to load activity logs');
+  }
+
+  Future<Map<String, dynamic>> getPaginatedNotifications({int page = 1, int limit = 20}) async {
+    final response = await _api.get('/notifications', queryParameters: {'page': page, 'limit': limit});
+    if (response.statusCode == 200 && response.data['success'] == true) {
+      final logsData = response.data['notifications'] as List<dynamic>? ?? [];
+      final notifications = logsData.map((e) => RecentActivityModel.fromJson(e)).toList();
+      return {
+        'notifications': notifications,
+        'totalPages': response.data['total_pages'] ?? 1,
+        'total': response.data['total'] ?? 0,
+      };
+    }
+    throw Exception('Failed to load notifications');
+  }
 }

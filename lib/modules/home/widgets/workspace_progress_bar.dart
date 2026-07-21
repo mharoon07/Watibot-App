@@ -6,6 +6,7 @@ class WorkspaceProgressBar extends StatelessWidget {
   final int current;
   final int max;
   final Color color;
+  final bool isUnlimited;
 
   const WorkspaceProgressBar({
     super.key,
@@ -13,11 +14,12 @@ class WorkspaceProgressBar extends StatelessWidget {
     required this.current,
     required this.max,
     required this.color,
+    this.isUnlimited = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final percentage = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+    final percentage = isUnlimited ? 1.0 : (max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,7 @@ class WorkspaceProgressBar extends StatelessWidget {
               ),
             ),
             Text(
-              '$current / $max',
+              isUnlimited ? '$current / ∞' : '$current / $max',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

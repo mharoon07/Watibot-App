@@ -5,13 +5,20 @@ import 'package:watibot/modules/home/models/usage_overview_model.dart';
 import 'package:watibot/modules/home/models/workspace_status_model.dart';
 import 'package:watibot/modules/home/repositories/home_repository.dart';
 import 'package:watibot/core/services/api_service.dart';
+import 'package:watibot/core/services/storage_service.dart';
+import 'package:watibot/modules/home/routes/home_routes.dart';
 
 class HomeController extends GetxController {
   final HomeRepository _repository;
+  final StorageService _storage = Get.find<StorageService>();
 
   HomeController(this._repository);
   final loading = true.obs;
   final selectedTab = 0.obs;
+
+  final RxString userName = ''.obs;
+  final RxString userAvatar = ''.obs;
+  final RxString accountEmail = ''.obs;
 
   final Rx<DashboardStatsModel?> dashboardStats = Rx<DashboardStatsModel?>(null);
   final Rx<WorkspaceStatusModel?> workspaceStatus = Rx<WorkspaceStatusModel?>(null);
@@ -26,6 +33,8 @@ class HomeController extends GetxController {
 
   Future<void> loadDashboard() async {
     loading.value = true;
+    userName.value = _storage.userName ?? 'User';
+    userAvatar.value = _storage.userAvatar ?? '';
     try {
       await Future.wait([
         loadDashboardData(),
@@ -56,6 +65,7 @@ class HomeController extends GetxController {
       final rawData = await _repository.getDashboardData();
       dashboardStats.value = DashboardStatsModel.fromJson(rawData['dashboard'] ?? {});
       workspaceStatus.value = WorkspaceStatusModel.fromJson(rawData['project'] ?? {});
+      accountEmail.value = workspaceStatus.value?.email ?? userName.value;
     } catch (e) {
       print('Failed to load dashboard data: $e');
     }
@@ -83,7 +93,7 @@ class HomeController extends GetxController {
    }
 
   void openNotifications() {
-    Get.snackbar('Notifications', 'No new notifications');
+    Get.toNamed(HomeRoutes.notifications);
   }
 
   void openProfile() {

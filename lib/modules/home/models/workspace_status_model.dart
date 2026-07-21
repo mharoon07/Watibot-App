@@ -2,6 +2,7 @@ class WorkspaceStatusModel {
   final String id;
   final String name;
   final String slug;
+  final String? email;
   final String plan;
   final String timezone;
   final String? logo;
@@ -14,6 +15,7 @@ class WorkspaceStatusModel {
     required this.id,
     required this.name,
     required this.slug,
+    this.email,
     required this.plan,
     required this.timezone,
     this.logo,
@@ -28,6 +30,7 @@ class WorkspaceStatusModel {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
+      email: json['email'],
       plan: json['plan'] ?? 'free',
       timezone: json['timezone'] ?? 'UTC',
       logo: json['logo'],
@@ -43,6 +46,7 @@ class WorkspaceStatusModel {
       'id': id,
       'name': name,
       'slug': slug,
+      'email': email,
       'plan': plan,
       'timezone': timezone,
       'logo': logo,

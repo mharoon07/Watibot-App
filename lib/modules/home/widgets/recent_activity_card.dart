@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/modules/home/models/recent_activity_model.dart';
+import 'package:watibot/modules/home/routes/home_routes.dart';
 import 'package:watibot/modules/home/widgets/activity_tile.dart';
 
 class RecentActivityCard extends StatelessWidget {
@@ -57,30 +59,32 @@ class RecentActivityCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Recent Activity',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
-                  letterSpacing: -0.3,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recent Activity',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                    letterSpacing: -0.3,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Latest updates from your workspace',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: const Color(0xFF64748B),
+                const SizedBox(height: 2),
+                Text(
+                  'Latest updates from your workspace',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () => Get.toNamed(HomeRoutes.activityLog),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               minimumSize: Size.zero,
@@ -111,7 +115,7 @@ class RecentActivityCard extends StatelessWidget {
       children: [
         const Divider(height: 1, color: Color(0xFFF1F5F9)),
         InkWell(
-          onTap: () {},
+          onTap: () => Get.toNamed(HomeRoutes.activityLog),
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(20),
             bottomRight: Radius.circular(20),

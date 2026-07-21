@@ -5,11 +5,15 @@ import 'package:watibot/core/theme/app_theme.dart';
 class DashboardHeader extends StatelessWidget {
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
+  final String userName;
+  final String userAvatar;
 
   const DashboardHeader({
     super.key,
     required this.onNotificationTap,
     required this.onProfileTap,
+    required this.userName,
+    required this.userAvatar,
   });
 
   @override
@@ -24,8 +28,8 @@ class DashboardHeader extends StatelessWidget {
             child: CircleAvatar(
               radius: 20,
               backgroundColor: AppTheme.borderColor,
-              backgroundImage: const NetworkImage(
-                'https://i.pravatar.cc/150?img=47',
+              backgroundImage: NetworkImage(
+                userAvatar.isNotEmpty ? userAvatar : 'https://i.pravatar.cc/150?img=47',
               ),
             ),
           ),
@@ -44,7 +48,7 @@ class DashboardHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'WatiBot Admin',
+                  userName.isNotEmpty ? userName : 'WatiBot Admin',
                   style: GoogleFonts.outfit(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,

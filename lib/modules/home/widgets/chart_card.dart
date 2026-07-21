@@ -36,7 +36,7 @@ class ChartCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Messages Sent this Month',
+                    'Total Messages Sent (All-Time)',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -48,7 +48,7 @@ class ChartCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0, end: data.totalMessages.toDouble()),
+                        tween: Tween<double>(begin: 0, end: data.outboundMessages.toDouble()),
                         duration: const Duration(seconds: 2),
                         curve: Curves.easeOutCubic,
                         builder: (context, value, child) {
@@ -64,34 +64,6 @@ class ChartCard extends StatelessWidget {
                             ),
                           );
                         },
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        margin: const EdgeInsets.only(bottom: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.arrow_upward,
-                              color: AppTheme.primaryColor,
-                              size: 10,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${data.messageGrowth}%',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
@@ -114,25 +86,27 @@ class ChartCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 64,
-            width: double.infinity,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: const Duration(seconds: 2),
-              curve: Curves.easeOutCubic,
-              builder: (context, progress, child) {
-                return CustomPaint(
-                  painter: _SmoothChartPainter(
-                    data: data.messageChartData,
-                    progress: progress,
-                    color: AppTheme.primaryColor,
-                  ),
-                );
-              },
+          if (data.messageChartData.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 64,
+              width: double.infinity,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(seconds: 2),
+                curve: Curves.easeOutCubic,
+                builder: (context, progress, child) {
+                  return CustomPaint(
+                    painter: _SmoothChartPainter(
+                      data: data.messageChartData,
+                      progress: progress,
+                      color: AppTheme.primaryColor,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

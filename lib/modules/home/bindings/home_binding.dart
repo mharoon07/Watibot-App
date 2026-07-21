@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:watibot/modules/more/controllers/more_controller.dart';
 import 'package:watibot/modules/home/controllers/home_controller.dart';
 import 'package:watibot/modules/home/repositories/home_repository.dart';
 import 'package:watibot/modules/inbox/controllers/inbox_controller.dart';
@@ -25,5 +26,8 @@ class HomeBinding extends Bindings {
     // Initialize Contacts dependencies for Bottom Nav
     Get.lazyPut<ContactsRepository>(() => ContactsRepository());
     Get.lazyPut<ContactsController>(() => ContactsController(Get.find<ContactsRepository>()));
+
+    // Initialize More dependencies for Bottom Nav
+    Get.lazyPut<MoreController>(() => MoreController());
   }
 }

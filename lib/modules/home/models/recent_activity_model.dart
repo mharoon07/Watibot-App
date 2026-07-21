@@ -31,9 +31,13 @@ class RecentActivityModel {
       details: json['details'],
       userName: json['user_name'] ?? json['userName'],
       userEmail: json['user_email'] ?? json['userEmail'],
-      createdAt: json['created_at'] != null || json['createdAt'] != null
-          ? DateTime.tryParse(json['created_at'] ?? json['createdAt'] ?? '')
-          : null,
+      createdAt: json['created_at_iso'] != null
+          ? DateTime.tryParse(json['created_at_iso'])
+          : (json['created_at'] is int
+              ? DateTime.fromMillisecondsSinceEpoch(json['created_at'] * 1000)
+              : (json['created_at'] != null
+                  ? DateTime.tryParse(json['created_at'].toString())
+                  : null)),
     );
   }
 

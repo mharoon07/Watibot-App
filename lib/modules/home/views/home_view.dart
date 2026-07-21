@@ -16,7 +16,6 @@ import 'package:watibot/modules/more/views/more_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +67,7 @@ class HomeView extends GetView<HomeController> {
       }
 
       final statCards = [
-        {'title': 'Total Conversations', 'value': '${stats.outboundMessages}', 'trend': 18.6, 'icon': 'forum'},
+        {'title': 'Total Conversations', 'value': '${stats.liveChats}', 'trend': 18.6, 'icon': 'forum'},
         {'title': 'Active Contacts', 'value': '${stats.activeContacts}', 'trend': 14.2, 'icon': 'people'},
         {'title': 'Campaign Sent', 'value': '${stats.campaignsSent}', 'trend': 22.5, 'icon': 'rocket_launch'},
         {'title': 'Active Flows', 'value': '${stats.totalFlows}', 'trend': 8.4, 'icon': 'account_tree'},
@@ -81,10 +80,14 @@ class HomeView extends GetView<HomeController> {
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
-              child: DashboardHeader(
+              child: Obx(() => DashboardHeader(
                 onNotificationTap: controller.openNotifications,
                 onProfileTap: controller.openProfile,
-              ),
+                userName: controller.accountEmail.value.isNotEmpty 
+                    ? controller.accountEmail.value 
+                    : controller.userName.value,
+                userAvatar: controller.userAvatar.value,
+              )),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(

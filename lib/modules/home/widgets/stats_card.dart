@@ -148,24 +148,6 @@ class _StatsCardState extends State<StatsCard> with SingleTickerProviderStateMix
                         size: 16,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                          color: trendColor,
-                          size: 12,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${widget.trend.abs()}%',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: trendColor,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
                 const SizedBox(height: 12),

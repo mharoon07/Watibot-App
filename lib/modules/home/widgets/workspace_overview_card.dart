@@ -276,6 +276,7 @@ class WorkspaceOverviewCard extends StatelessWidget {
                 label: resource.name,
                 current: resource.used,
                 max: resource.limit <= 0 ? resource.used + 1 : resource.limit,
+                isUnlimited: resource.unlimited,
                 color: const Color(0xFF25D366),
               ),
             );

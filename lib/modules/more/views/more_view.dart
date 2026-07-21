@@ -8,7 +8,9 @@ import 'package:watibot/modules/more/widgets/more_profile_card.dart';
 import 'package:watibot/modules/more/widgets/more_section_header.dart';
 import 'package:watibot/modules/more/widgets/more_stats_row.dart';
 
-class MoreView extends StatelessWidget {
+import 'package:watibot/modules/more/controllers/more_controller.dart';
+
+class MoreView extends GetView<MoreController> {
   const MoreView({super.key});
 
   @override
@@ -53,13 +55,15 @@ class MoreView extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: MoreProfileCard(
-              avatarUrl: 'https://i.pravatar.cc/150?img=68',
-              name: 'Muhammad Haroon',
-              role: 'Administrator',
-              workspace: 'WatiBot Enterprise',
-              onEditProfile: () {},
-            ),
+            child: Obx(() => MoreProfileCard(
+              avatarUrl: controller.userAvatar.value.isNotEmpty 
+                  ? controller.userAvatar.value 
+                  : (controller.workspaceLogo.value.isNotEmpty ? controller.workspaceLogo.value : 'https://i.pravatar.cc/150?img=68'),
+              name: controller.userName.value,
+              role: controller.userRole.value,
+              workspace: controller.workspaceName.value,
+              onEditProfile: controller.openProfileDetails,
+            )),
           ),
           const SliverToBoxAdapter(
             child: MoreStatsRow(),

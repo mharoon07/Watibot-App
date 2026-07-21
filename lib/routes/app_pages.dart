@@ -25,10 +25,27 @@ import 'package:watibot/modules/contacts/views/contacts_view.dart';
 import 'package:watibot/modules/contacts/bindings/contacts_binding.dart';
 import 'package:watibot/modules/contacts/views/contact_details_view.dart';
 
+import 'package:watibot/modules/home/bindings/activity_log_binding.dart';
+import 'package:watibot/modules/home/views/activity_log_view.dart';
+import 'package:watibot/modules/home/bindings/notifications_binding.dart';
+import 'package:watibot/modules/home/views/notifications_view.dart';
+
 class AppPages {
   static const initial = AuthRoutes.login;
 
   static final routes = [
+    GetPage(
+      name: HomeRoutes.notifications,
+      page: () => const NotificationsView(),
+      binding: NotificationsBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: HomeRoutes.activityLog,
+      page: () => const ActivityLogView(),
+      binding: ActivityLogBinding(),
+      transition: Transition.rightToLeft,
+    ),
     GetPage(
       name: AuthRoutes.login,
       page: () => const LoginView(),

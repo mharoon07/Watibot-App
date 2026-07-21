@@ -33,6 +33,7 @@ class AuthRepository {
             email: user['email'],
             name: user['name'],
             role: user['role'],
+            avatar: user['image'],
           );
         }
         return {
@@ -65,6 +66,7 @@ class AuthRepository {
             email: user['email'],
             name: user['name'],
             role: user['role'],
+            avatar: user['image'],
           );
         }
         return true;
