@@ -64,22 +64,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.videocam_outlined, color: Color(0xFF475569)),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.call_outlined, color: Color(0xFF475569)),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: Color(0xFF475569)),
-          onPressed: () {
-            // Open bottom sheet
-          },
-        ),
-      ],
+
     );
   }
 

@@ -88,14 +88,6 @@ class MoreView extends GetView<MoreController> {
                   color: const Color(0xFF8B5CF6),
                   onTap: () {},
                 ),
-                _buildDivider(),
-                MoreMenuTile(
-                  title: 'Campaign Assets',
-                  subtitle: 'Reusable snippets and variables',
-                  icon: Icons.extension_outlined,
-                  color: const Color(0xFF14B8A6),
-                  onTap: () {},
-                ),
               ]),
 
               // Team Section
@@ -116,14 +108,6 @@ class MoreView extends GetView<MoreController> {
                   color: const Color(0xFFEC4899),
                   onTap: () {},
                 ),
-                _buildDivider(),
-                MoreMenuTile(
-                  title: 'Teams',
-                  subtitle: 'Departments and routing rules',
-                  icon: Icons.groups_outlined,
-                  color: const Color(0xFFF59E0B),
-                  onTap: () {},
-                ),
               ]),
 
               // Communication Section
@@ -134,22 +118,6 @@ class MoreView extends GetView<MoreController> {
                   subtitle: 'Push, email, and sound preferences',
                   icon: Icons.notifications_none_outlined,
                   color: const Color(0xFF6366F1),
-                  onTap: () {},
-                ),
-                _buildDivider(),
-                MoreMenuTile(
-                  title: 'Broadcast Logs',
-                  subtitle: 'View detailed delivery reports',
-                  icon: Icons.podcasts_outlined,
-                  color: const Color(0xFFF97316),
-                  onTap: () {},
-                ),
-                _buildDivider(),
-                MoreMenuTile(
-                  title: 'Message Queue',
-                  subtitle: 'Pending and scheduled messages',
-                  icon: Icons.schedule_send_outlined,
-                  color: const Color(0xFF0EA5E9),
                   onTap: () {},
                 ),
               ]),
@@ -170,14 +138,6 @@ class MoreView extends GetView<MoreController> {
                   subtitle: 'Connect Shopify, Zapier, etc.',
                   icon: Icons.api_outlined,
                   color: const Color(0xFF10B981),
-                  onTap: () {},
-                ),
-                _buildDivider(),
-                MoreMenuTile(
-                  title: 'API Keys',
-                  subtitle: 'Manage developer access',
-                  icon: Icons.key_outlined,
-                  color: const Color(0xFF8B5CF6),
                   onTap: () {},
                 ),
                 _buildDivider(),

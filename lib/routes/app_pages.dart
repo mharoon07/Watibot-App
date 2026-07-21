@@ -34,13 +34,22 @@ import 'package:watibot/modules/home/views/notifications_view.dart';
 
 import 'package:watibot/core/services/storage_service.dart';
 
+import 'package:watibot/modules/splash/routes/splash_routes.dart';
+import 'package:watibot/modules/splash/views/splash_view.dart';
+import 'package:watibot/modules/splash/bindings/splash_binding.dart';
+
 class AppPages {
   static String get initial {
-    final storage = Get.find<StorageService>();
-    return storage.hasToken ? HomeRoutes.home : AuthRoutes.login;
+    return SplashRoutes.splash;
   }
 
   static final routes = [
+    GetPage(
+      name: SplashRoutes.splash,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
       name: HomeRoutes.notifications,
       page: () => const NotificationsView(),

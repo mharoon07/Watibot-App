@@ -14,8 +14,8 @@ class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
 
   // Controllers
-  final emailController = TextEditingController(text: 'admin@watibot.com');
-  final passwordController = TextEditingController(text: 'Password@123');
+  final emailController = TextEditingController(text: 'asaankhata.com@gmail.com');
+  final passwordController = TextEditingController(text: 'asaankhata.com@gmail.com');
 
   // Focus Nodes
   final emailFocus = FocusNode();

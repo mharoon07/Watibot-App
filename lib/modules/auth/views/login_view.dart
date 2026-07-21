@@ -63,14 +63,21 @@ class LoginView extends GetView<LoginController> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Text(
-          'WatiBot',
-          style: GoogleFonts.outfit(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF006633), // Dark green text based on branding
-            letterSpacing: -1,
-          ),
+        Image.asset(
+          'assets/logo.png',
+          height: 60,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Text(
+              'WatiBot',
+              style: GoogleFonts.outfit(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF006633),
+                letterSpacing: -1,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 8),
         Text(
@@ -245,8 +252,11 @@ class LoginView extends GetView<LoginController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Using a colored generic icon to represent Google until assets are imported
-          const Icon(Icons.g_mobiledata, size: 28, color: Colors.redAccent),
+          Image.asset(
+            'assets/google_logo.png',
+            height: 24,
+            width: 24,
+          ),
           const SizedBox(width: 8),
           Text(
             'Continue with Google',

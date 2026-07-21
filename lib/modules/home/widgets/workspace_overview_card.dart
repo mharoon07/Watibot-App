@@ -258,14 +258,7 @@ class WorkspaceOverviewCard extends StatelessWidget {
                   color: const Color(0xFF0F172A),
                 ),
               ),
-              Text(
-                '${usageOverview!.percentage}% used',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
+
             ],
           ),
           const SizedBox(height: 16),
