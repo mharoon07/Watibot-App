@@ -6,7 +6,7 @@ class ApiService extends GetxService {
   late Dio _dio;
 
   // Using ngrok URL to bypass local network/firewall restrictions
-  static const String baseUrl = 'https://scorch-gorged-dad.ngrok-free.dev/api/v1';
+  static const String baseUrl = 'https://app.watibot.io/api/v1';
 
   static Map<String, String>? getMediaHeaders(String url) {
     if (url.contains('cloudinary.com')) {
