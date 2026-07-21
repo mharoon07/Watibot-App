@@ -4,86 +4,31 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:watibot/modules/contacts/models/contact_model.dart';
 import 'package:watibot/modules/contacts/widgets/contact_avatar.dart';
-import 'package:watibot/modules/contacts/widgets/contact_status_badge.dart';
 
 class ContactTile extends StatelessWidget {
   final ContactModel contact;
   final VoidCallback onTap;
-  final VoidCallback onCall;
-  final VoidCallback onChat;
-  final VoidCallback onFavorite;
-  final VoidCallback onBlock;
-  final VoidCallback onDelete;
-  final VoidCallback onArchive;
 
   const ContactTile({
     super.key,
     required this.contact,
     required this.onTap,
-    required this.onCall,
-    required this.onChat,
-    required this.onFavorite,
-    required this.onBlock,
-    required this.onDelete,
-    required this.onArchive,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Determine if contact is online (seen in last 10 mins)
-    final isOnline = DateTime.now().difference(contact.lastSeen).inMinutes <= 10;
+    final String phone = contact.phoneNumber ?? (contact.waId != null ? '+${contact.waId}' : 'Unknown');
+    final String company = (contact.attributes['company'] as String?) ?? '';
+    final String subtitle = company.isNotEmpty ? '$company • $phone' : phone;
 
     return Slidable(
       key: ValueKey(contact.id),
-      // Left side actions (Swipe Right)
-      startActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.6,
-        children: [
-          SlidableAction(
-            onPressed: (_) => onCall(),
-            backgroundColor: const Color(0xFF3B82F6), // Blue
-            foregroundColor: Colors.white,
-            icon: Icons.call_outlined,
-            label: 'Call',
-          ),
-          SlidableAction(
-            onPressed: (_) => onChat(),
-            backgroundColor: const Color(0xFF25D366), // WhatsApp Green
-            foregroundColor: Colors.white,
-            icon: Icons.chat_bubble_outline,
-            label: 'Chat',
-          ),
-          SlidableAction(
-            onPressed: (_) => onFavorite(),
-            backgroundColor: const Color(0xFFF59E0B), // Amber
-            foregroundColor: Colors.white,
-            icon: contact.isFavorite ? Icons.star : Icons.star_border,
-            label: 'Favorite',
-          ),
-        ],
-      ),
-      // Right side actions (Swipe Left)
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: 0.6,
+        extentRatio: 0.25,
         children: [
           SlidableAction(
-            onPressed: (_) => onArchive(),
-            backgroundColor: const Color(0xFF64748B), // Slate
-            foregroundColor: Colors.white,
-            icon: Icons.archive_outlined,
-            label: 'Archive',
-          ),
-          SlidableAction(
-            onPressed: (_) => onBlock(),
-            backgroundColor: const Color(0xFFF97316), // Orange
-            foregroundColor: Colors.white,
-            icon: Icons.block_outlined,
-            label: 'Block',
-          ),
-          SlidableAction(
-            onPressed: (_) => onDelete(),
+            onPressed: (_) {},
             backgroundColor: const Color(0xFFEF4444), // Red
             foregroundColor: Colors.white,
             icon: Icons.delete_outline,
@@ -100,40 +45,30 @@ class ContactTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ContactAvatar(
-                imageUrl: contact.avatarUrl,
-                name: contact.name,
+                imageUrl: contact.profilePic ?? '',
+                name: contact.initials,
                 size: 48,
-                isOnline: isOnline,
+                isOnline: false, // Could map this later
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            contact.name,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0F172A),
-                              letterSpacing: -0.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (contact.isWhatsappVerified) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.verified, color: Color(0xFF25D366), size: 14),
-                        ],
-                      ],
+                    Text(
+                      contact.displayName,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF0F172A),
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${contact.company.isNotEmpty ? '${contact.company} • ' : ''}${contact.phone}',
+                      subtitle,
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
@@ -145,11 +80,26 @@ class ContactTile extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        ContactStatusBadge(status: contact.status),
-                        if (contact.tags.isNotEmpty) ...[
+                        if (contact.tags.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFDBEAFE),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              contact.tags.first.name.toUpperCase(),
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1E40AF),
+                              ),
+                            ),
+                          ),
+                        if (contact.tags.length > 1) ...[
                           const SizedBox(width: 8),
                           Text(
-                            '+${contact.tags.length}',
+                            '+${contact.tags.length - 1}',
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               color: const Color(0xFF94A3B8),
@@ -167,37 +117,21 @@ class ContactTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (contact.isFavorite)
-                        const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14),
-                      if (contact.isFavorite) const SizedBox(width: 4),
+                      // Using tick marks from design
+                      if (contact.lastMessageAt != null)
+                        const Icon(Icons.check_circle, color: Color(0xFF25D366), size: 14),
+                      if (contact.lastMessageAt != null)
+                        const SizedBox(width: 4),
                       Text(
-                        _formatDate(contact.lastInteraction),
+                        _formatDate(contact.lastMessageAt),
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          fontWeight: contact.unreadCount > 0 ? FontWeight.w600 : FontWeight.w500,
-                          color: contact.unreadCount > 0 ? const Color(0xFF25D366) : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF25D366),
                         ),
                       ),
                     ],
                   ),
-                  if (contact.unreadCount > 0) ...[
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF25D366),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        contact.unreadCount.toString(),
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ],
@@ -207,18 +141,22 @@ class ContactTile extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
     final now = DateTime.now();
     final difference = now.difference(date);
 
-    if (difference.inDays == 0 && now.day == date.day) {
+    if (difference.inDays == 0) {
+      if (date.day != now.day) {
+        return 'Yesterday';
+      }
       return DateFormat.jm().format(date);
-    } else if (difference.inDays == 1 || (difference.inDays == 0 && now.day != date.day)) {
+    } else if (difference.inDays == 1) {
       return 'Yesterday';
     } else if (difference.inDays < 7) {
       return DateFormat('EEEE').format(date);
     } else {
-      return DateFormat('MMM d').format(date);
+      return DateFormat('dd/MM/yy').format(date);
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:watibot/core/theme/app_theme.dart';
 import 'package:watibot/modules/contacts/models/contact_model.dart';
 import 'package:watibot/modules/contacts/widgets/contact_avatar.dart';
 import 'package:watibot/modules/contacts/widgets/contact_status_badge.dart';
@@ -13,7 +12,13 @@ class ContactDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ContactModel contact = Get.arguments as ContactModel;
-    final isOnline = DateTime.now().difference(contact.lastSeen).inMinutes <= 10;
+    final isOnline = contact.lastMessageAt != null 
+        ? DateTime.now().difference(contact.lastMessageAt!).inMinutes <= 10 
+        : false;
+
+    final String phone = contact.phoneNumber ?? contact.waId ?? '';
+    final String company = (contact.attributes['company'] as String?) ?? '';
+    final String status = contact.tags.isNotEmpty ? contact.tags.first.name : '';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -26,10 +31,7 @@ class ContactDetailsView extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              contact.isFavorite ? Icons.star : Icons.star_border,
-              color: contact.isFavorite ? const Color(0xFFF59E0B) : const Color(0xFF475569),
-            ),
+            icon: const Icon(Icons.star_border, color: Color(0xFF475569)),
             onPressed: () {},
           ),
           IconButton(
@@ -49,14 +51,14 @@ class ContactDetailsView extends StatelessWidget {
               child: Column(
                 children: [
                   ContactAvatar(
-                    imageUrl: contact.avatarUrl,
-                    name: contact.name,
+                    imageUrl: contact.profilePic ?? '',
+                    name: contact.initials,
                     size: 80,
                     isOnline: isOnline,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    contact.name,
+                    contact.displayName,
                     style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -65,7 +67,7 @@ class ContactDetailsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${contact.company.isNotEmpty ? '${contact.company} • ' : ''}${contact.phone}',
+                    company.isNotEmpty ? '$company • $phone' : phone,
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       color: const Color(0xFF64748B),
@@ -75,45 +77,11 @@ class ContactDetailsView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ContactStatusBadge(status: contact.status),
-                      if (contact.isWhatsappVerified) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDCFCE7),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.verified, color: Color(0xFF25D366), size: 12),
-                              const SizedBox(width: 4),
-                              Text(
-                                'WhatsApp Verified',
-                                style: GoogleFonts.inter(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF166534),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      if (status.isNotEmpty)
+                        ContactStatusBadge(status: status),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildActionButton(Icons.call_outlined, 'Call', const Color(0xFF3B82F6)),
-                      const SizedBox(width: 16),
-                      _buildActionButton(Icons.chat_bubble_outline, 'Chat', const Color(0xFF25D366)),
-                      const SizedBox(width: 16),
-                      _buildActionButton(Icons.rocket_launch_outlined, 'Campaign', const Color(0xFF8B5CF6)),
-                    ],
-                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -125,9 +93,9 @@ class ContactDetailsView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionCard('Contact Information', [
-                    _buildInfoRow(Icons.email_outlined, 'Email', contact.email),
-                    _buildInfoRow(Icons.phone_outlined, 'Phone', contact.phone),
-                    _buildInfoRow(Icons.business_outlined, 'Company', contact.company),
+                    _buildInfoRow(Icons.email_outlined, 'Email', contact.email ?? ''),
+                    _buildInfoRow(Icons.phone_outlined, 'Phone', phone),
+                    _buildInfoRow(Icons.business_outlined, 'Company', company),
                   ]),
                   const SizedBox(height: 16),
                   if (contact.tags.isNotEmpty)
@@ -142,7 +110,7 @@ class ContactDetailsView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
-                            tag,
+                            tag.name,
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -153,9 +121,17 @@ class ContactDetailsView extends StatelessWidget {
                       ),
                     ]),
                   const SizedBox(height: 16),
+                  if (contact.attributes.isNotEmpty) ...[
+                    _buildSectionCard('Custom Fields', contact.attributes.entries.map((e) {
+                      return _buildInfoRow(Icons.label_important_outline, e.key.toUpperCase(), e.value.toString());
+                    }).toList()),
+                    const SizedBox(height: 16),
+                  ],
                   _buildSectionCard('Activity', [
-                    _buildInfoRow(Icons.access_time, 'Last Seen', _formatDetailedDate(contact.lastSeen)),
-                    _buildInfoRow(Icons.sync, 'Last Interaction', _formatDetailedDate(contact.lastInteraction)),
+                    if (contact.lastMessageAt != null)
+                      _buildInfoRow(Icons.access_time, 'Last Message', _formatDetailedDate(contact.lastMessageAt!)),
+                    if (contact.createdAt != null)
+                      _buildInfoRow(Icons.sync, 'Created At', _formatDetailedDate(contact.createdAt!)),
                   ]),
                 ],
               ),
@@ -166,30 +142,6 @@ class ContactDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF475569),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildSectionCard(String title, List<Widget> children) {
     return Container(
@@ -219,7 +171,7 @@ class ContactDetailsView extends StatelessWidget {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    if (value.isEmpty) return const SizedBox.shrink();
+    final displayValue = value.isEmpty ? '-' : value;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -237,9 +189,9 @@ class ContactDetailsView extends StatelessWidget {
                   color: const Color(0xFF64748B),
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
-                value,
+                displayValue,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

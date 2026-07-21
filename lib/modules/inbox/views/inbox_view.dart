@@ -35,9 +35,16 @@ class InboxView extends GetView<InboxController> {
                 onRefresh: controller.refreshInbox,
                 color: AppTheme.primaryColor,
                 child: ListView.builder(
+                  controller: controller.scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: controller.filteredConversations.length,
+                  itemCount: controller.filteredConversations.length + (controller.isLoadingMore.value ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index == controller.filteredConversations.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+                      );
+                    }
                     final conv = controller.filteredConversations[index];
                     return ConversationTile(
                       conversation: conv,
@@ -64,7 +71,12 @@ class InboxView extends GetView<InboxController> {
         padding: const EdgeInsets.all(8.0),
         child: CircleAvatar(
           backgroundColor: const Color(0xFFE2E8F0),
-          backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=68'), // Current user
+          backgroundImage: controller.userAvatar.isNotEmpty 
+              ? NetworkImage(controller.userAvatar) 
+              : null,
+          child: controller.userAvatar.isEmpty 
+              ? const Icon(Icons.person, color: Color(0xFF94A3B8))
+              : null,
         ),
       ),
       title: Text(
@@ -78,7 +90,9 @@ class InboxView extends GetView<InboxController> {
       actions: [
         IconButton(
           icon: const Icon(Icons.notifications_outlined, color: Color(0xFF475569)),
-          onPressed: () {},
+          onPressed: () {
+            Get.toNamed('/notifications');
+          },
         ),
       ],
     );
@@ -131,10 +145,11 @@ class InboxView extends GetView<InboxController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adjusting your filters or search query.',
+            controller.lastError.value.isNotEmpty ? controller.lastError.value : 'Try adjusting your filters or search query.',
+            textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: const Color(0xFF94A3B8),
+              color: controller.lastError.value.isNotEmpty ? Colors.red.shade400 : const Color(0xFF94A3B8),
             ),
           ),
         ],

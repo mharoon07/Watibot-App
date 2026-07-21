@@ -10,16 +10,15 @@ class FilterChipList extends GetView<InboxController> {
   final List<Map<String, dynamic>> filters = [
     {'label': 'All', 'icon': null},
     {'label': 'Unread', 'icon': null},
-    {'label': 'Handled by AI', 'icon': Icons.smart_toy},
-    {'label': 'Assigned To Me', 'icon': Icons.person},
-    {'label': 'Starred', 'icon': Icons.star},
-    {'label': 'High Priority', 'icon': Icons.priority_high},
+    {'label': 'Assigned Chat', 'icon': Icons.person},
+    {'label': 'AI Chat', 'icon': Icons.smart_toy},
+    {'label': 'Intervented Chat', 'icon': Icons.support_agent},
   ];
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 60,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
@@ -34,45 +33,49 @@ class FilterChipList extends GetView<InboxController> {
           return Obx(() {
             final isSelected = controller.activeFilter.value == label;
 
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: FilterChip(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(
-                        icon,
-                        size: 16,
-                        color: isSelected ? AppTheme.primaryColor : const Color(0xFF64748B),
-                      ),
-                      const SizedBox(width: 4),
-                    ],
-                    Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: isSelected ? AppTheme.primaryColor : const Color(0xFF475569),
+            return Center(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => controller.setActiveFilter(label),
+                  borderRadius: BorderRadius.circular(20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.fromBorderSide(
+                        BorderSide(
+                          color: isSelected ? AppTheme.primaryColor.withOpacity(0.3) : const Color(0xFFE2E8F0),
+                          width: 1,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                selected: isSelected,
-                onSelected: (bool selected) {
-                  controller.setFilter(label);
-                },
-                backgroundColor: Colors.white,
-                selectedColor: AppTheme.primaryColor.withOpacity(0.1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(
-                    color: isSelected ? AppTheme.primaryColor.withOpacity(0.3) : const Color(0xFFE2E8F0),
-                    width: 1,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (icon != null) ...[
+                          Icon(
+                            icon,
+                            size: 16,
+                            color: isSelected ? AppTheme.primaryColor : const Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          label,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? AppTheme.primaryColor : const Color(0xFF475569),
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                showCheckmark: false,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             );
           });

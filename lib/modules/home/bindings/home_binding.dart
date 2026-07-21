@@ -25,7 +25,7 @@ class HomeBinding extends Bindings {
 
     // Initialize Contacts dependencies for Bottom Nav
     Get.lazyPut<ContactsRepository>(() => ContactsRepository());
-    Get.lazyPut<ContactsController>(() => ContactsController(Get.find<ContactsRepository>()));
+    Get.lazyPut<ContactsController>(() => ContactsController());
 
     // Initialize More dependencies for Bottom Nav
     Get.lazyPut<MoreController>(() => MoreController());

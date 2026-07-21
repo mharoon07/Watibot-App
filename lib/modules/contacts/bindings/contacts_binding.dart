@@ -6,6 +6,6 @@ class ContactsBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<ContactsRepository>(() => ContactsRepository());
-    Get.lazyPut<ContactsController>(() => ContactsController(Get.find()));
+    Get.lazyPut<ContactsController>(() => ContactsController());
   }
 }

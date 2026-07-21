@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
+import 'package:watibot/core/services/api_service.dart';
 import 'package:watibot/core/theme/app_theme.dart';
 import 'package:watibot/modules/inbox/models/message_model.dart';
+import 'package:watibot/modules/inbox/widgets/audio_player_widget.dart';
+import 'package:watibot/modules/inbox/routes/inbox_routes.dart';
+import 'package:watibot/modules/inbox/widgets/inline_video_player.dart';
+import 'package:watibot/modules/inbox/widgets/lazy_image_widget.dart';
 
 class ChatBubble extends StatelessWidget {
   final MessageModel message;
@@ -87,14 +94,103 @@ class ChatBubble extends StatelessWidget {
               ),
               const SizedBox(height: 4),
             ],
-            Text(
-              message.content,
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                color: textColor,
-                height: 1.3,
+            if (message.attachmentType == AttachmentType.voice && message.attachmentUrl != null)
+              AudioPlayerWidget(
+                audioUrl: message.attachmentUrl!,
+                isOutgoing: isOutgoing,
+              )
+            else if (message.content == '[Audio]' && message.attachmentUrl != null)
+              AudioPlayerWidget(
+                audioUrl: message.attachmentUrl!,
+                isOutgoing: isOutgoing,
+              )
+            else if (message.attachmentType == AttachmentType.image && message.attachmentUrl != null)
+              LazyImageWidget(
+                imageUrl: message.attachmentUrl!,
+                onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: message.attachmentUrl!),
+              )
+            else if (message.content == '[Image]' && message.attachmentUrl != null)
+              LazyImageWidget(
+                imageUrl: message.attachmentUrl!,
+                onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: message.attachmentUrl!),
+              )
+            else if (message.attachmentType == AttachmentType.video && message.attachmentUrl != null)
+              InlineVideoPlayer(videoUrl: message.attachmentUrl!)
+            else if (message.content == '[Video]' && message.attachmentUrl != null)
+              InlineVideoPlayer(videoUrl: message.attachmentUrl!)
+            else if ((message.attachmentType == AttachmentType.document || message.attachmentType == AttachmentType.pdf) && message.attachmentUrl != null)
+              GestureDetector(
+                onTap: () => _launchUrl(message.attachmentUrl!),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.insert_drive_file, size: 30, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          message.content,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.download, size: 20, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              )
+            else if (message.content.endsWith('.pdf') && message.attachmentUrl != null)
+              GestureDetector(
+                onTap: () => _launchUrl(message.attachmentUrl!),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.insert_drive_file, size: 30, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          message.content,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.download, size: 20, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Text(
+                message.content,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: textColor,
+                  height: 1.3,
+                ),
               ),
-            ),
             const SizedBox(height: 4),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -145,5 +241,23 @@ class ChatBubble extends StatelessWidget {
 
   String _formatTime(DateTime time) {
     return '${time.hour > 12 ? time.hour - 12 : time.hour}:${time.minute.toString().padLeft(2, '0')} ${time.hour >= 12 ? 'PM' : 'AM'}';
+  }
+
+  Future<void> _launchUrl(String url) async {
+    String finalUrl = url;
+    // Force download for Cloudinary PDFs to avoid browser viewer errors
+    if (url.contains('res.cloudinary.com') && url.toLowerCase().endsWith('.pdf')) {
+      if (url.contains('/upload/') && !url.contains('/fl_attachment/')) {
+        finalUrl = url.replaceFirst('/upload/', '/upload/fl_attachment/');
+      }
+    }
+    final uri = Uri.parse(finalUrl);
+    
+    // Attempt to launch directly without canLaunchUrl check
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Failed to launch url: $e');
+    }
   }
 }

@@ -16,6 +16,8 @@ import 'package:watibot/modules/inbox/views/inbox_view.dart';
 import 'package:watibot/modules/inbox/bindings/inbox_binding.dart';
 import 'package:watibot/modules/inbox/views/chat_view.dart';
 import 'package:watibot/modules/inbox/bindings/chat_binding.dart';
+import 'package:watibot/modules/inbox/views/image_preview_view.dart';
+import 'package:watibot/modules/inbox/views/pdf_preview_view.dart';
 import 'package:watibot/modules/campaigns/routes/campaigns_routes.dart';
 import 'package:watibot/modules/campaigns/views/campaigns_view.dart';
 import 'package:watibot/modules/campaigns/bindings/campaigns_binding.dart';
@@ -30,8 +32,13 @@ import 'package:watibot/modules/home/views/activity_log_view.dart';
 import 'package:watibot/modules/home/bindings/notifications_binding.dart';
 import 'package:watibot/modules/home/views/notifications_view.dart';
 
+import 'package:watibot/core/services/storage_service.dart';
+
 class AppPages {
-  static const initial = AuthRoutes.login;
+  static String get initial {
+    final storage = Get.find<StorageService>();
+    return storage.hasToken ? HomeRoutes.home : AuthRoutes.login;
+  }
 
   static final routes = [
     GetPage(
@@ -87,6 +94,16 @@ class AppPages {
       page: () => const ChatView(),
       binding: ChatBinding(),
       transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: InboxRoutes.imagePreview,
+      page: () => const ImagePreviewView(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: InboxRoutes.pdfPreview,
+      page: () => const PdfPreviewView(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: CampaignsRoutes.campaigns,

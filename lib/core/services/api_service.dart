@@ -8,6 +8,20 @@ class ApiService extends GetxService {
   // Using ngrok URL to bypass local network/firewall restrictions
   static const String baseUrl = 'https://scorch-gorged-dad.ngrok-free.dev/api/v1';
 
+  static Map<String, String>? getMediaHeaders(String url) {
+    if (url.contains('cloudinary.com')) {
+      return null;
+    }
+    final storage = Get.find<StorageService>();
+    if (storage.hasToken) {
+      return {
+        'Authorization': 'Bearer ${storage.getToken()}',
+        'ngrok-skip-browser-warning': 'true',
+      };
+    }
+    return null;
+  }
+
   Future<ApiService> init() async {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
@@ -34,6 +48,10 @@ class ApiService extends GetxService {
         return handler.next(response);
       },
       onError: (DioException e, handler) {
+        if (e.response?.statusCode == 401) {
+          Get.find<StorageService>().clearAll();
+          Get.offAllNamed('/login'); // We use string literal to avoid circular dependency
+        }
         return handler.next(e);
       },
     ));

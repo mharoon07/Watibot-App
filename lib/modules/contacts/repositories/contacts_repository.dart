@@ -1,100 +1,45 @@
+import 'package:get/get.dart';
+import 'package:watibot/core/services/api_service.dart';
 import 'package:watibot/modules/contacts/models/contact_model.dart';
 
 class ContactsRepository {
-  Future<List<ContactModel>> getContacts() async {
-    await Future.delayed(const Duration(milliseconds: 600)); // Simulate network
+  final ApiService _api = Get.find<ApiService>();
 
-    return [
-      ContactModel(
-        id: '1',
-        name: 'Sarah Jenkins',
-        phone: '+1 (555) 019-2834',
-        email: 'sarah.j@acmecorp.com',
-        company: 'Acme Corp',
-        avatarUrl: 'https://i.pravatar.cc/150?img=47',
-        lastSeen: DateTime.now().subtract(const Duration(minutes: 5)),
-        status: ContactStatus.vip,
-        isFavorite: true,
-        tags: ['Enterprise', 'Q4 Prospect'],
-        lastInteraction: DateTime.now().subtract(const Duration(hours: 2)),
-        isWhatsappVerified: true,
-        unreadCount: 3,
-      ),
-      ContactModel(
-        id: '2',
-        name: 'Michael Chen',
-        phone: '+1 (555) 837-9921',
-        email: 'm.chen@techflow.io',
-        company: 'TechFlow',
-        avatarUrl: 'https://i.pravatar.cc/150?img=11',
-        lastSeen: DateTime.now().subtract(const Duration(hours: 1)),
-        status: ContactStatus.customer,
-        isFavorite: false,
-        tags: ['SaaS', 'Onboarding'],
-        lastInteraction: DateTime.now().subtract(const Duration(days: 1)),
-        isWhatsappVerified: true,
-        unreadCount: 0,
-      ),
-      ContactModel(
-        id: '3',
-        name: 'Emma Rodriguez',
-        phone: '+44 7700 900077',
-        email: 'emma@designstudio.co.uk',
-        company: 'Creative Design Studio',
-        avatarUrl: 'https://i.pravatar.cc/150?img=5',
-        lastSeen: DateTime.now().subtract(const Duration(days: 2)),
-        status: ContactStatus.lead,
-        isFavorite: true,
-        tags: ['Agency', 'Warm'],
-        lastInteraction: DateTime.now().subtract(const Duration(days: 3)),
-        isWhatsappVerified: false,
-        unreadCount: 1,
-      ),
-      ContactModel(
-        id: '4',
-        name: 'David Kim',
-        phone: '+1 (555) 234-5678',
-        email: 'dkim@logisticsplus.com',
-        company: 'Logistics Plus',
-        avatarUrl: '', // Will use initials 'DK'
-        lastSeen: DateTime.now().subtract(const Duration(minutes: 45)),
-        status: ContactStatus.customer,
-        isFavorite: false,
-        tags: ['Logistics', 'Renewal'],
-        lastInteraction: DateTime.now().subtract(const Duration(hours: 5)),
-        isWhatsappVerified: true,
-        unreadCount: 0,
-      ),
-      ContactModel(
-        id: '5',
-        name: 'Spam Caller',
-        phone: '+1 (555) 000-0000',
-        email: 'unknown@spam.com',
-        company: 'Unknown',
-        avatarUrl: '',
-        lastSeen: DateTime.now().subtract(const Duration(days: 30)),
-        status: ContactStatus.blocked,
-        isFavorite: false,
-        tags: ['Spam'],
-        lastInteraction: DateTime.now().subtract(const Duration(days: 30)),
-        isWhatsappVerified: false,
-        unreadCount: 0,
-      ),
-      ContactModel(
-        id: '6',
-        name: 'Olivia Martinez',
-        phone: '+34 600 123 456',
-        email: 'olivia.m@startup.es',
-        company: 'Startup Hub',
-        avatarUrl: 'https://i.pravatar.cc/150?img=32',
-        lastSeen: DateTime.now().subtract(const Duration(minutes: 12)),
-        status: ContactStatus.lead,
-        isFavorite: false,
-        tags: ['Startup', 'Cold'],
-        lastInteraction: DateTime.now().subtract(const Duration(days: 5)),
-        isWhatsappVerified: true,
-        unreadCount: 0,
-      ),
-    ];
+  Future<Map<String, dynamic>> getPaginatedContacts({
+    int page = 1,
+    int limit = 20,
+    String search = '',
+    String tab = 'all',
+  }) async {
+    final Map<String, dynamic> queryParams = {
+      'page': page,
+      'limit': limit,
+    };
+    
+    if (search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    
+    // The backend uses tag_id, group_id, platform. Wait, no, the backend has tag_id, group_id, platform.
+    // Let's pass 'tab' locally, and we can handle it here or in the controller.
+    // Wait, the API doesn't have a 'tab' param for contacts. It has tag_id, group_id, platform.
+    // If we want "Customers", we might pass a specific tag_id or maybe it's not strictly supported by a 'tab' param.
+    // We'll pass `tab` as a placeholder or use it if we can.
+    if (tab != 'all') {
+       queryParams['tab'] = tab; // We will see if we need to modify this later.
+    }
+
+    final response = await _api.get('/contacts', queryParameters: queryParams);
+    
+    if (response.statusCode == 200 && response.data['success'] == true) {
+      final contactsData = response.data['contacts'] as List<dynamic>? ?? [];
+      final contacts = contactsData.map((e) => ContactModel.fromJson(e as Map<String, dynamic>)).toList();
+      return {
+        'contacts': contacts,
+        'totalPages': response.data['total_pages'] ?? 1,
+        'total': response.data['total'] ?? 0,
+      };
+    }
+    throw Exception('Failed to load contacts');
   }
 }

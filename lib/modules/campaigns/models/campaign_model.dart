@@ -32,6 +32,57 @@ class CampaignModel {
   });
 
   bool get isDynamicAudience => audienceCount == -1;
+
+  factory CampaignModel.fromJson(Map<String, dynamic> json) {
+    int attempts = json['attempts'] ?? 0;
+    int audience = json['audience_count'] ?? 0;
+    
+    // Calculate actual progress based on attempts vs audience
+    double progress = 0.0;
+    if (audience > 0) {
+      progress = (attempts / audience).clamp(0.0, 1.0);
+    } else if (json['status'] == 'SENT' || json['status'] == 'COMPLETED') {
+      progress = 1.0;
+    }
+
+    return CampaignModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? json['template_name']?.toString() ?? 'Untitled Campaign',
+      type: json['type']?.toString().toUpperCase() == 'DRIP' ? 'Drip' 
+            : json['type']?.toString().toUpperCase() == 'BROADCAST' ? 'Broadcast' 
+            : 'Automation',
+      status: _parseStatus(json['status']?.toString() ?? ''),
+      createdAt: json['scheduled_at_iso'] != null 
+          ? DateTime.tryParse(json['scheduled_at_iso'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      audienceCount: audience,
+      owner: 'Admin',
+      messagesSent: attempts,
+      deliveryRate: (json['delivery_rate'] ?? 0.0).toDouble(),
+      openRate: (json['open_rate'] ?? 0.0).toDouble(),
+      clickRate: (json['click_rate'] ?? 0.0).toDouble(),
+      replyRate: (json['reply_rate'] ?? 0.0).toDouble(),
+      deliveryProgress: progress,
+    );
+  }
+
+  static CampaignStatus _parseStatus(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+      case 'SCHEDULED':
+        return CampaignStatus.scheduled;
+      case 'SENT':
+      case 'COMPLETED':
+        return CampaignStatus.completed;
+      case 'FAILED':
+        return CampaignStatus.paused;
+      case 'RUNNING':
+      case 'SENDING':
+        return CampaignStatus.sending;
+      default:
+        return CampaignStatus.draft;
+    }
+  }
 }
 
 enum CampaignStatus {

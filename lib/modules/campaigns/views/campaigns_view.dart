@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watibot/modules/home/controllers/home_controller.dart' as watibot_home;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/core/theme/app_theme.dart';
@@ -80,15 +81,24 @@ class CampaignsView extends GetView<CampaignsController> {
   }
 
   AppBar _buildAppBar() {
+    final homeController = Get.find<watibot_home.HomeController>();
+    
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
       leading: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          backgroundColor: const Color(0xFFE2E8F0),
-          backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=68'), // Current user
+        child: GestureDetector(
+          onTap: homeController.openProfile,
+          child: Obx(() => CircleAvatar(
+            backgroundColor: const Color(0xFFE2E8F0),
+            backgroundImage: NetworkImage(
+              homeController.userAvatar.value.isNotEmpty 
+                  ? homeController.userAvatar.value 
+                  : 'https://i.pravatar.cc/150?img=47'
+            ),
+          )),
         ),
       ),
       title: Column(
@@ -112,9 +122,24 @@ class CampaignsView extends GetView<CampaignsController> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Color(0xFF475569)),
-          onPressed: () {},
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            icon: const Stack(
+              children: [
+                Icon(Icons.notifications_none_rounded, color: Color(0xFF475569), size: 28),
+                Positioned(
+                  right: 2,
+                  top: 2,
+                  child: CircleAvatar(
+                    radius: 4,
+                    backgroundColor: Colors.redAccent,
+                  ),
+                ),
+              ],
+            ),
+            onPressed: homeController.openNotifications,
+          ),
         ),
       ],
     );

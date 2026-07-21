@@ -26,7 +26,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             CircleAvatar(
               radius: 18,
               backgroundColor: const Color(0xFFE2E8F0),
-              backgroundImage: NetworkImage(conversation.customerAvatar),
+              backgroundImage: NetworkImage(conversation.displayAvatar),
             ),
           ],
         ),

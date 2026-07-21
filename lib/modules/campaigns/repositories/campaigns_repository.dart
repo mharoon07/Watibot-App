@@ -1,97 +1,48 @@
+import 'package:get/get.dart';
+import 'package:watibot/core/services/api_service.dart';
 import 'package:watibot/modules/campaigns/models/campaign_model.dart';
 
 class CampaignsRepository {
-  Future<List<CampaignModel>> getCampaigns() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+  final ApiService _apiService = Get.find<ApiService>();
 
-    return [
-      CampaignModel(
-        id: '1',
-        name: 'Q3 Promo Announce',
-        type: 'Broadcast',
-        status: CampaignStatus.sending,
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-        audienceCount: 12450,
-        owner: 'Sarah J.',
-        messagesSent: 8466,
-        deliveryRate: 0.98,
-        openRate: 0.0,
-        clickRate: 0.0,
-        deliveryProgress: 0.68,
-      ),
-      CampaignModel(
-        id: '2',
-        name: 'Weekly Newsletter Flow',
-        type: 'Newsletter',
-        status: CampaignStatus.running,
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        audienceCount: -1, // Dynamic
-        owner: 'Marketing Team',
-        messagesSent: 45200,
-        deliveryRate: 0.99,
-        openRate: 0.82,
-        clickRate: 0.35,
-        replyRate: 0.05,
-      ),
-      CampaignModel(
-        id: '3',
-        name: 'Cart Abandonment Nurture',
-        type: 'Automation',
-        status: CampaignStatus.paused,
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        audienceCount: -1,
-        owner: 'E-commerce',
-        messagesSent: 3400,
-        deliveryRate: 0.95,
-        openRate: 0.45,
-        clickRate: 0.12,
-      ),
-      CampaignModel(
-        id: '4',
-        name: 'Black Friday VIP Early Access',
-        type: 'Broadcast',
-        status: CampaignStatus.scheduled,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        audienceCount: 5000,
-        owner: 'Sarah J.',
-        messagesSent: 0,
-      ),
-      CampaignModel(
-        id: '5',
-        name: 'Welcome Series - New Users',
-        type: 'Drip',
-        status: CampaignStatus.running,
-        createdAt: DateTime.now().subtract(const Duration(days: 90)),
-        audienceCount: -1,
-        owner: 'Product Team',
-        messagesSent: 120500,
-        deliveryRate: 0.99,
-        openRate: 0.75,
-        clickRate: 0.25,
-      ),
-      CampaignModel(
-        id: '6',
-        name: 'Re-engagement Q2',
-        type: 'Broadcast',
-        status: CampaignStatus.completed,
-        createdAt: DateTime.now().subtract(const Duration(days: 120)),
-        audienceCount: 8500,
-        owner: 'Sarah J.',
-        messagesSent: 8500,
-        deliveryRate: 0.94,
-        openRate: 0.32,
-        clickRate: 0.08,
-      ),
-      CampaignModel(
-        id: '7',
-        name: 'Holiday Greetings 2024',
-        type: 'Broadcast',
-        status: CampaignStatus.draft,
-        createdAt: DateTime.now(),
-        audienceCount: 25000,
-        owner: 'Marketing Team',
-        messagesSent: 0,
-      ),
-    ];
+  Future<Map<String, dynamic>> getPaginatedCampaigns({
+    int page = 1,
+    int limit = 20,
+    String search = '',
+    String tab = 'all',
+  }) async {
+    try {
+      final queryParams = {
+        'page': page,
+        'limit': limit,
+        if (search.isNotEmpty) 'search': search,
+      };
+
+      // Depending on the tab, we can filter by status or type
+      if (tab == 'scheduled') queryParams['status'] = 'SCHEDULED';
+      if (tab == 'running') queryParams['status'] = 'RUNNING';
+      if (tab == 'completed') queryParams['status'] = 'SENT';
+
+      final response = await _apiService.get('/campaigns', queryParameters: queryParams);
+      
+      final data = response.data;
+      if (data != null && data['success'] == true) {
+        final List<dynamic> campaignsJson = data['campaigns'] ?? [];
+        return {
+          'campaigns': campaignsJson.map((json) => CampaignModel.fromJson(json)).toList(),
+          'total': data['total'] ?? 0,
+          'totalPages': data['total_pages'] ?? 1,
+        };
+      }
+      throw ApiException(message: 'Invalid response format');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Fallback if anyone uses this
+  Future<List<CampaignModel>> getCampaigns() async {
+    final res = await getPaginatedCampaigns();
+    return res['campaigns'] as List<CampaignModel>;
   }
 }

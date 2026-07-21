@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/modules/contacts/models/contact_model.dart';
 
 class ContactStatusBadge extends StatelessWidget {
-  final ContactStatus status;
+  final String status;
 
   const ContactStatusBadge({super.key, required this.status});
 
@@ -13,32 +13,32 @@ class ContactStatusBadge extends StatelessWidget {
     Color textColor;
     String label;
 
-    switch (status) {
-      case ContactStatus.customer:
+    switch (status.toLowerCase()) {
+      case 'customer':
         bgColor = const Color(0xFFE0F2FE); // Light Sky
         textColor = const Color(0xFF0284C7); // Sky
         label = 'Customer';
         break;
-      case ContactStatus.lead:
+      case 'lead':
         bgColor = const Color(0xFFFEF3C7); // Light Amber
         textColor = const Color(0xFFD97706); // Amber
         label = 'Lead';
         break;
-      case ContactStatus.vip:
+      case 'vip':
         bgColor = const Color(0xFFF3E8FF); // Light Purple
         textColor = const Color(0xFF9333EA); // Purple
         label = 'VIP';
         break;
-      case ContactStatus.blocked:
+      case 'blocked':
         bgColor = const Color(0xFFFEE2E2); // Light Red
         textColor = const Color(0xFFDC2626); // Red
         label = 'Blocked';
         break;
-      case ContactStatus.unknown:
+      case 'unknown':
       default:
         bgColor = const Color(0xFFF1F5F9); // Light Slate
         textColor = const Color(0xFF64748B); // Slate
-        label = 'Unknown';
+        label = status.isNotEmpty ? status : 'Unknown';
         break;
     }
 

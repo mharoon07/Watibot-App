@@ -96,7 +96,7 @@ class ConversationTile extends StatelessWidget {
         CircleAvatar(
           radius: 24,
           backgroundColor: const Color(0xFFE2E8F0),
-          backgroundImage: NetworkImage(conversation.customerAvatar),
+          backgroundImage: NetworkImage(conversation.displayAvatar),
         ),
         if (conversation.isOnline)
           Positioned(
@@ -147,7 +147,7 @@ class ConversationTile extends StatelessWidget {
           ),
         ),
         Text(
-          _formatTime(conversation.lastMessage.timestamp),
+          conversation.lastMessage != null ? _formatTime(conversation.lastMessage!.timestamp) : '',
           style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: conversation.unreadCount > 0 ? FontWeight.w600 : FontWeight.w500,
@@ -159,13 +159,15 @@ class ConversationTile extends StatelessWidget {
   }
 
   Widget _buildBottomRow() {
+    if (conversation.lastMessage == null) return const SizedBox.shrink();
+
     return Row(
       children: [
-        if (conversation.lastMessage.type == MessageType.outgoing)
-          _buildMessageStatus(conversation.lastMessage.status),
+        if (conversation.lastMessage!.type == MessageType.outgoing)
+          _buildMessageStatus(conversation.lastMessage!.status),
         Expanded(
           child: Text(
-            conversation.lastMessage.content,
+            conversation.lastMessage!.content,
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: conversation.unreadCount > 0 ? FontWeight.w600 : FontWeight.w400,

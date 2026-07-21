@@ -14,8 +14,8 @@ class DashboardBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
@@ -33,7 +33,7 @@ class DashboardBottomNav extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, 'Home', Icons.home_filled, Icons.home_outlined),
           _buildNavItem(1, 'Inbox', Icons.chat_bubble, Icons.chat_bubble_outline),
@@ -55,7 +55,7 @@ class DashboardBottomNav extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         curve: Curves.fastOutSlowIn,
         padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 16 : 10,
+          horizontal: isSelected ? 12 : 8,
           vertical: 8,
         ),
         decoration: BoxDecoration(

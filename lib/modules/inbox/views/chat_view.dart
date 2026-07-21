@@ -28,22 +28,35 @@ class ChatView extends GetView<ChatController> {
 
               return ListView.builder(
                 controller: controller.scrollController,
+                reverse: true, // Reverses the list so it starts from the bottom
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                itemCount: controller.messages.length + (controller.isTyping.value ? 1 : 0),
+                itemCount: controller.messages.length + (controller.isLoadingMore.value ? 1 : 0) + (controller.isTyping.value ? 1 : 0),
                 itemBuilder: (context, index) {
-                  // Typing indicator at the bottom
-                  if (index == controller.messages.length) {
+                  // If reverse is true, index 0 is the BOTTOM of the screen.
+                  // The bottom-most item should be the typing indicator (if any).
+                  if (controller.isTyping.value && index == 0) {
                     return const TypingIndicator();
                   }
 
-                  final message = controller.messages[index];
+                  // Offset index if typing indicator is present
+                  final msgIndex = controller.isTyping.value ? index - 1 : index;
+
+                  // If we reached the end of the messages, show loader
+                  if (msgIndex == controller.messages.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+                    );
+                  }
+
+                  final message = controller.messages[msgIndex];
                   
-                  // Basic logic to show date separator for the first message or if day changes
+                  // In a reversed list, the "previous" message chronologically is at msgIndex + 1
                   bool showDate = false;
-                  if (index == 0) {
-                    showDate = true;
+                  if (msgIndex == controller.messages.length - 1) {
+                    showDate = true; // Oldest message
                   } else {
-                    final prevMessage = controller.messages[index - 1];
+                    final prevMessage = controller.messages[msgIndex + 1];
                     final current = message.timestamp;
                     final prev = prevMessage.timestamp;
                     if (current.year != prev.year || current.month != prev.month || current.day != prev.day) {
