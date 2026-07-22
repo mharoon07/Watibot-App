@@ -8,8 +8,13 @@ import 'package:watibot/core/services/media_cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Get.putAsync(() => StorageService().init());
-  await Get.putAsync(() => ApiService().init());
-  await Get.putAsync(() => MediaCacheService().init());
+  try {
+    await Get.putAsync(() => StorageService().init());
+    await Get.putAsync(() => ApiService().init());
+    await Get.putAsync(() => MediaCacheService().init());
+  } catch (e) {
+    debugPrint('Service init error: $e');
+  }
   runApp(const App());
 }
+

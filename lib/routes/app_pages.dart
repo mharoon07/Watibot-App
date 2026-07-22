@@ -26,15 +26,24 @@ import 'package:watibot/modules/contacts/routes/contacts_routes.dart';
 import 'package:watibot/modules/contacts/views/contacts_view.dart';
 import 'package:watibot/modules/contacts/bindings/contacts_binding.dart';
 import 'package:watibot/modules/contacts/views/contact_details_view.dart';
+import 'package:watibot/modules/templates/routes/templates_routes.dart';
+import 'package:watibot/modules/templates/views/templates_view.dart';
+import 'package:watibot/modules/templates/views/template_details_view.dart';
+import 'package:watibot/modules/templates/views/create_template_view.dart';
+import 'package:watibot/modules/templates/bindings/templates_binding.dart';
+import 'package:watibot/modules/media_library/routes/media_library_routes.dart';
+import 'package:watibot/modules/media_library/views/media_library_view.dart';
+import 'package:watibot/modules/media_library/bindings/media_library_binding.dart';
+
+
 
 import 'package:watibot/modules/home/bindings/activity_log_binding.dart';
 import 'package:watibot/modules/home/views/activity_log_view.dart';
 import 'package:watibot/modules/home/bindings/notifications_binding.dart';
 import 'package:watibot/modules/home/views/notifications_view.dart';
 
-import 'package:watibot/core/services/storage_service.dart';
-
 import 'package:watibot/modules/splash/routes/splash_routes.dart';
+
 import 'package:watibot/modules/splash/views/splash_view.dart';
 import 'package:watibot/modules/splash/bindings/splash_binding.dart';
 
@@ -136,5 +145,29 @@ class AppPages {
       page: () => const ContactDetailsView(),
       transition: Transition.rightToLeft,
     ),
+    GetPage(
+      name: TemplatesRoutes.templates,
+      page: () => const TemplatesView(),
+      binding: TemplatesBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: TemplatesRoutes.templateDetails,
+      page: () => const TemplateDetailsView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: TemplatesRoutes.createTemplate,
+      page: () => const CreateTemplateView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: MediaLibraryRoutes.mediaLibrary,
+      page: () => const MediaLibraryView(),
+      binding: MediaLibraryBinding(),
+      transition: Transition.fadeIn,
+    ),
   ];
 }
+
+

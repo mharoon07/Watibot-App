@@ -6,7 +6,7 @@ class ApiService extends GetxService {
   late Dio _dio;
 
   // Using ngrok URL to bypass local network/firewall restrictions
-  static const String baseUrl = 'https://app.watibot.io/api/v1';
+  static const String baseUrl = 'https://scorch-gorged-dad.ngrok-free.dev/api/v1';
 
   static Map<String, String>? getMediaHeaders(String url) {
     if (url.contains('cloudinary.com')) {
@@ -59,15 +59,29 @@ class ApiService extends GetxService {
     return this;
   }
 
+  static String extractErrorMessage(dynamic respData, String fallbackMessage) {
+    if (respData is Map) {
+      return respData['error']?.toString() ?? respData['message']?.toString() ?? fallbackMessage;
+    }
+    if (respData is String && respData.isNotEmpty) {
+      if (respData.contains('<!DOCTYPE') || respData.contains('<html') || respData.contains('404:')) {
+        return 'API endpoint not found (404)';
+      }
+      return respData;
+    }
+    return fallbackMessage;
+  }
+
+
   Future<Response> post(String path, {dynamic data}) async {
     try {
       final response = await _dio.post(path, data: data);
       return response;
     } on DioException catch (e) {
-      // Re-throw or handle specific errors here
       if (e.response != null) {
+        final msg = extractErrorMessage(e.response?.data, e.message ?? 'Unknown error occurred');
         throw ApiException(
-          message: e.response?.data['error'] ?? e.message ?? 'Unknown error occurred',
+          message: msg,
           statusCode: e.response?.statusCode,
         );
       } else {
@@ -82,8 +96,9 @@ class ApiService extends GetxService {
       return response;
     } on DioException catch (e) {
       if (e.response != null) {
+        final msg = extractErrorMessage(e.response?.data, e.message ?? 'Unknown error occurred');
         throw ApiException(
-          message: e.response?.data['error'] ?? e.message ?? 'Unknown error occurred',
+          message: msg,
           statusCode: e.response?.statusCode,
         );
       } else {
@@ -92,6 +107,7 @@ class ApiService extends GetxService {
     }
   }
 }
+
 
 class ApiException implements Exception {
   final String message;

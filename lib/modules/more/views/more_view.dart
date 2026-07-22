@@ -78,16 +78,18 @@ class MoreView extends GetView<MoreController> {
                   subtitle: 'Create and manage WhatsApp templates',
                   icon: Icons.dashboard_customize_outlined,
                   color: const Color(0xFF3B82F6),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/templates'),
                 ),
+
                 _buildDivider(),
                 MoreMenuTile(
                   title: 'Media Library',
                   subtitle: 'Images, videos, and documents',
                   icon: Icons.perm_media_outlined,
                   color: const Color(0xFF8B5CF6),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/media-library'),
                 ),
+
               ]),
 
               // Team Section
