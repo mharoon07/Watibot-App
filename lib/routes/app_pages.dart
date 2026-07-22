@@ -34,15 +34,35 @@ import 'package:watibot/modules/templates/bindings/templates_binding.dart';
 import 'package:watibot/modules/media_library/routes/media_library_routes.dart';
 import 'package:watibot/modules/media_library/views/media_library_view.dart';
 import 'package:watibot/modules/media_library/bindings/media_library_binding.dart';
+import 'package:watibot/modules/agents/routes/agents_routes.dart';
+import 'package:watibot/modules/agents/views/agents_view.dart';
+import 'package:watibot/modules/agents/views/agent_details_view.dart';
+import 'package:watibot/modules/agents/bindings/agents_binding.dart';
+
+import 'package:watibot/modules/audience/routes/audience_routes.dart';
+import 'package:watibot/modules/audience/views/audience_view.dart';
+import 'package:watibot/modules/audience/views/audience_details_view.dart';
+import 'package:watibot/modules/audience/bindings/audience_binding.dart';
+
+import 'package:watibot/modules/notifications/routes/notifications_routes.dart';
+import 'package:watibot/modules/notifications/views/notifications_view.dart';
+import 'package:watibot/modules/notifications/bindings/notifications_binding.dart';
+
+import 'package:watibot/modules/integrations/routes/integrations_routes.dart';
+import 'package:watibot/modules/integrations/views/integrations_view.dart';
+import 'package:watibot/modules/integrations/bindings/integrations_binding.dart';
+
+
+
+
 
 
 
 import 'package:watibot/modules/home/bindings/activity_log_binding.dart';
 import 'package:watibot/modules/home/views/activity_log_view.dart';
-import 'package:watibot/modules/home/bindings/notifications_binding.dart';
-import 'package:watibot/modules/home/views/notifications_view.dart';
 
 import 'package:watibot/modules/splash/routes/splash_routes.dart';
+
 
 import 'package:watibot/modules/splash/views/splash_view.dart';
 import 'package:watibot/modules/splash/bindings/splash_binding.dart';
@@ -167,7 +187,45 @@ class AppPages {
       binding: MediaLibraryBinding(),
       transition: Transition.fadeIn,
     ),
+    GetPage(
+      name: AgentsRoutes.agents,
+      page: () => const AgentsView(),
+      binding: AgentsBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AgentsRoutes.agentDetails,
+      page: () => const AgentDetailsView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AudienceRoutes.audience,
+      page: () => const AudienceView(),
+      binding: AudienceBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AudienceRoutes.audienceDetails,
+      page: () => const AudienceDetailsView(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: NotificationsRoutes.notifications,
+      page: () => const NotificationsView(),
+      binding: NotificationsBinding(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: IntegrationsRoutes.integrations,
+      page: () => const IntegrationsView(),
+      binding: IntegrationsBinding(),
+      transition: Transition.fadeIn,
+    ),
   ];
 }
+
+
+
+
 
 

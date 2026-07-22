@@ -75,9 +75,9 @@ class ChatView extends GetView<ChatController> {
             }),
           ),
           MessageInput(
-            controller: controller.textController,
-            onSend: controller.sendMessage,
+            chatController: controller,
           ),
+
         ],
       ),
     );

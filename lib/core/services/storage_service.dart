@@ -56,7 +56,11 @@ class StorageService extends GetxService {
   String? get userRole => _prefs.getString(_userRoleKey);
   String? get userAvatar => _prefs.getString(_userAvatarKey);
 
+  int? getInt(String key) => _prefs.getInt(key);
+  Future<void> setInt(String key, int value) async => await _prefs.setInt(key, value);
+
   Future<void> clearAll() async {
     await _prefs.clear();
   }
 }
+

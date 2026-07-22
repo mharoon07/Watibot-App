@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
-import 'package:watibot/core/services/api_service.dart';
+
 import 'package:watibot/core/theme/app_theme.dart';
 import 'package:watibot/modules/inbox/models/message_model.dart';
 import 'package:watibot/modules/inbox/widgets/audio_player_widget.dart';
@@ -220,6 +220,10 @@ class ChatBubble extends StatelessWidget {
     Color color;
 
     switch (status) {
+      case MessageStatus.none:
+        icon = Icons.access_time;
+        color = const Color(0xFF94A3B8);
+        break;
       case MessageStatus.sent:
         icon = Icons.check;
         color = const Color(0xFF94A3B8);
@@ -232,9 +236,8 @@ class ChatBubble extends StatelessWidget {
         icon = Icons.done_all;
         color = const Color(0xFF3B82F6);
         break;
-      default:
-        return const SizedBox.shrink();
     }
+
 
     return Icon(icon, size: 14, color: color);
   }

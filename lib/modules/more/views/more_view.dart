@@ -100,16 +100,18 @@ class MoreView extends GetView<MoreController> {
                   subtitle: 'Manage your support and sales team',
                   icon: Icons.support_agent_outlined,
                   color: const Color(0xFF25D366),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/agents'),
                 ),
+
                 _buildDivider(),
                 MoreMenuTile(
                   title: 'Audience',
                   subtitle: 'Customer segments and tags',
                   icon: Icons.people_outline,
                   color: const Color(0xFFEC4899),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/audience'),
                 ),
+
               ]),
 
               // Communication Section
@@ -120,8 +122,9 @@ class MoreView extends GetView<MoreController> {
                   subtitle: 'Push, email, and sound preferences',
                   icon: Icons.notifications_none_outlined,
                   color: const Color(0xFF6366F1),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/notifications'),
                 ),
+
               ]),
 
               // Workspace Section
@@ -137,11 +140,12 @@ class MoreView extends GetView<MoreController> {
                 _buildDivider(),
                 MoreMenuTile(
                   title: 'Integrations',
-                  subtitle: 'Connect Shopify, Zapier, etc.',
+                  subtitle: 'Connect Shopify, WooCommerce, etc.',
                   icon: Icons.api_outlined,
                   color: const Color(0xFF10B981),
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/integrations'),
                 ),
+
                 _buildDivider(),
                 MoreMenuTile(
                   title: 'Billing',
