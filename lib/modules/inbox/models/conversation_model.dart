@@ -58,6 +58,53 @@ class ConversationModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': customerName,
+      'profile_pic': customerAvatar,
+      'wa_id': customerPhone,
+      'latest_message': lastMessage?.toJson(),
+      'last_message_at_iso': lastMessageAt.toIso8601String(),
+      'unread_count': unreadCount,
+      'is_ai_bot_enabled': handledByAi,
+      'is_verified': isVerified,
+      'assigned_users': assignedAgent != null ? [{'name': assignedAgent}] : [],
+    };
+  }
+
+  ConversationModel copyWith({
+    String? id,
+    String? customerName,
+    String? customerAvatar,
+    String? customerPhone,
+    MessageModel? lastMessage,
+    DateTime? lastMessageAt,
+    int? unreadCount,
+    bool? isOnline,
+    bool? isPinned,
+    bool? handledByAi,
+    String? priority,
+    bool? isVerified,
+    String? assignedAgent,
+  }) {
+    return ConversationModel(
+      id: id ?? this.id,
+      customerName: customerName ?? this.customerName,
+      customerAvatar: customerAvatar ?? this.customerAvatar,
+      customerPhone: customerPhone ?? this.customerPhone,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+      unreadCount: unreadCount ?? this.unreadCount,
+      isOnline: isOnline ?? this.isOnline,
+      isPinned: isPinned ?? this.isPinned,
+      handledByAi: handledByAi ?? this.handledByAi,
+      priority: priority ?? this.priority,
+      isVerified: isVerified ?? this.isVerified,
+      assignedAgent: assignedAgent ?? this.assignedAgent,
+    );
+  }
+
   String get displayAvatar {
     if (customerAvatar.isNotEmpty) return customerAvatar;
     final name = customerName.isEmpty ? customerPhone : customerName;

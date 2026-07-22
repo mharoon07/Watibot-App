@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:watibot/core/services/chat_cache_service.dart';
 import 'package:watibot/core/services/storage_service.dart';
 import 'package:watibot/modules/inbox/models/conversation_model.dart';
 import 'package:watibot/modules/inbox/repositories/inbox_repository.dart';
@@ -8,6 +9,7 @@ import 'package:watibot/modules/inbox/repositories/inbox_repository.dart';
 class InboxController extends GetxController {
   final InboxRepository _repository;
   final _storage = Get.find<StorageService>();
+  final _cacheService = Get.find<ChatCacheService>();
 
   String get userAvatar => _storage.userAvatar ?? '';
 
@@ -31,18 +33,28 @@ class InboxController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchConversations();
     
-    // Setup debounce for search
+    // Load cached conversations instantly (0ms load time)
+    final cachedList = _cacheService.getCachedConversations();
+    if (cachedList.isNotEmpty) {
+      conversations.assignAll(cachedList);
+      filterChats();
+      isLoading.value = false;
+    }
+
+    // Fetch latest conversations from CRM in background
+    fetchConversations(silent: cachedList.isNotEmpty);
+    
+    // Setup debounce for network search
     debounce(searchQuery, (_) {
       _currentPage = 1;
-      fetchConversations();
+      fetchConversations(silent: conversations.isNotEmpty);
     }, time: const Duration(milliseconds: 300));
 
     scrollController.addListener(_onScroll);
     
-    // Start silent polling every 10 seconds
-    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+    // Fast silent polling every 6 seconds for real-time CRM updates
+    _pollingTimer = Timer.periodic(const Duration(seconds: 6), (_) {
       pollConversations();
     });
   }
@@ -60,9 +72,12 @@ class InboxController extends GetxController {
     }
   }
 
-  Future<void> fetchConversations() async {
+  Future<void> fetchConversations({bool silent = false}) async {
     _currentPage = 1;
-    isLoading.value = true;
+    if (!silent && conversations.isEmpty) {
+      isLoading.value = true;
+    }
+    
     try {
       final tabMap = {
         'All': 'all',
@@ -84,15 +99,21 @@ class InboxController extends GetxController {
         requesterEmail: requesterEmail,
       );
       
-      // Prevent race conditions: discard data if the tab changed during the request
+      // Prevent race conditions: discard data if tab changed during request
       if ((tabMap[activeFilter.value] ?? 'all') != currentTab) {
         return;
       }
 
-      conversations.assignAll(data['conversations'] as List<ConversationModel>);
+      final fetchedList = data['conversations'] as List<ConversationModel>;
+      conversations.assignAll(fetchedList);
       filterChats();
       _hasMore = data['hasMore'] as bool;
-      debugPrint('Fetched ${conversations.length} conversations');
+      lastError.value = '';
+
+      // Persist to local cache if standard tab and search
+      if (activeFilter.value == 'All' && searchQuery.value.isEmpty) {
+        _cacheService.saveConversations(fetchedList);
+      }
     } catch (e, stack) {
       lastError.value = e.toString();
       debugPrint('Error fetching conversations: $e');
@@ -124,7 +145,6 @@ class InboxController extends GetxController {
         requesterEmail: requesterEmail,
       );
 
-      // Prevent race conditions: discard data if the tab changed during the request
       if ((tabMap[activeFilter.value] ?? 'all') != currentTab) {
         return;
       }
@@ -135,9 +155,12 @@ class InboxController extends GetxController {
       for (var newConv in newConvos) {
         final index = conversations.indexWhere((c) => c.id == newConv.id);
         if (index != -1) {
-          if (conversations[index].unreadCount != newConv.unreadCount ||
-              conversations[index].lastMessage != newConv.lastMessage ||
-              conversations[index].isPinned != newConv.isPinned) {
+          final existing = conversations[index];
+          if (existing.unreadCount != newConv.unreadCount ||
+              existing.lastMessage?.id != newConv.lastMessage?.id ||
+              existing.lastMessage?.content != newConv.lastMessage?.content ||
+              existing.lastMessage?.status != newConv.lastMessage?.status ||
+              existing.isPinned != newConv.isPinned) {
             conversations[index] = newConv;
             changed = true;
           }
@@ -149,6 +172,9 @@ class InboxController extends GetxController {
       
       if (changed) {
         filterChats();
+        if (activeFilter.value == 'All' && searchQuery.value.isEmpty) {
+          _cacheService.saveConversations(conversations.toList());
+        }
       }
     } catch (e) {
       debugPrint('Silent poll failed: $e');
@@ -181,16 +207,14 @@ class InboxController extends GetxController {
         requesterEmail: requesterEmail,
       );
 
-      // Prevent race conditions: discard data if the tab changed during the request
       if ((tabMap[activeFilter.value] ?? 'all') != currentTab) {
-        _currentPage--; // Revert page increment
+        _currentPage--;
         return;
       }
       
       final newConvos = data['conversations'] as List<ConversationModel>;
       _hasMore = data['hasMore'] as bool;
 
-      // Prevent duplicates
       for (var conv in newConvos) {
         if (!conversations.any((c) => c.id == conv.id)) {
           conversations.add(conv);
@@ -198,7 +222,7 @@ class InboxController extends GetxController {
       }
       filterChats();
     } catch (e, stack) {
-      _currentPage--; // Revert page on failure
+      _currentPage--;
       debugPrint('Error fetching next page: $e');
       debugPrint('Stacktrace: $stack');
     } finally {
@@ -207,23 +231,37 @@ class InboxController extends GetxController {
   }
 
   void setActiveFilter(String filter) {
-    if (activeFilter.value == filter) return; // Ignore if same filter tapped
+    if (activeFilter.value == filter) return;
     activeFilter.value = filter;
-    fetchConversations(); // Trigger a new API fetch from page 1
+    fetchConversations(silent: conversations.isNotEmpty);
   }
 
   void setSearchQuery(String query) {
     searchQuery.value = query;
+    filterChats(); // Instant local search
   }
 
   void filterChats() {
     var result = conversations.toList();
-    // Sort: Pinned first, then by timestamp
+
+    // Perform instant local text search if query provided
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result.where((c) {
+        final nameMatch = c.customerName.toLowerCase().contains(query);
+        final phoneMatch = c.customerPhone.toLowerCase().contains(query);
+        final messageMatch = c.lastMessage?.content.toLowerCase().contains(query) ?? false;
+        return nameMatch || phoneMatch || messageMatch;
+      }).toList();
+    }
+
+    // Sort: Pinned first, then by latest timestamp descending
     result.sort((a, b) {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.lastMessageAt.compareTo(a.lastMessageAt);
     });
+    
     filteredConversations.assignAll(result);
   }
 

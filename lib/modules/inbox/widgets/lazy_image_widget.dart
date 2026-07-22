@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:watibot/core/services/api_service.dart';
-import 'package:watibot/core/services/media_cache_service.dart';
 
-class LazyImageWidget extends StatefulWidget {
+class LazyImageWidget extends StatelessWidget {
   final String imageUrl;
   final VoidCallback onTap;
 
@@ -14,97 +12,48 @@ class LazyImageWidget extends StatefulWidget {
   });
 
   @override
-  State<LazyImageWidget> createState() => _LazyImageWidgetState();
-}
-
-class _LazyImageWidgetState extends State<LazyImageWidget> {
-  late final MediaCacheService _mediaCache;
-  bool _isLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _mediaCache = Get.find<MediaCacheService>();
-    _isLoaded = _mediaCache.isLoaded(widget.imageUrl);
-  }
-
-  void _loadMedia() {
-    setState(() {
-      _isLoaded = true;
-    });
-    _mediaCache.markAsLoaded(widget.imageUrl);
-  }
-
-  String _getBlurredThumbnailUrl(String url) {
-    if (url.contains('res.cloudinary.com') && url.contains('/upload/')) {
-      return url.replaceFirst('/upload/', '/upload/w_50,e_blur:200,f_auto,q_auto/');
-    }
-    return url;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoaded) {
-      return GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 250),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              widget.imageUrl,
-              fit: BoxFit.cover,
-              headers: ApiService.getMediaHeaders(widget.imageUrl),
-              errorBuilder: (context, error, stackTrace) => const SizedBox(
-                height: 150,
-                width: 200,
-                child: Center(child: Icon(Icons.broken_image, size: 40, color: Colors.grey)),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final isCloudinary = widget.imageUrl.contains('res.cloudinary.com');
-
     return GestureDetector(
-      onTap: _loadMedia,
+      onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(maxHeight: 250, minHeight: 150, minWidth: 200),
+        constraints: const BoxConstraints(maxHeight: 250, minHeight: 120),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Stack(
-            alignment: Alignment.center,
-            fit: StackFit.passthrough,
-            children: [
-              if (isCloudinary)
-                Image.network(
-                  _getBlurredThumbnailUrl(widget.imageUrl),
-                  fit: BoxFit.cover,
-                  headers: ApiService.getMediaHeaders(widget.imageUrl),
-                  errorBuilder: (context, error, stackTrace) => Container(color: Colors.black12),
-                )
-              else
-                Container(color: Colors.black12),
-              
-              // Dark overlay for better contrast
-              Container(color: Colors.black.withOpacity(0.3)),
-              
-              // Download Button
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            headers: ApiService.getMediaHeaders(imageUrl),
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                height: 180,
+                color: const Color(0xFFE2E8F0),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                        : null,
+                    color: const Color(0xFF00B074),
+                    strokeWidth: 2,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.download_rounded,
-                  color: Colors.white,
-                  size: 28,
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              height: 150,
+              width: 200,
+              color: const Color(0xFFF1F5F9),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.broken_image, size: 36, color: Color(0xFF94A3B8)),
+                    SizedBox(height: 6),
+                    Text('Failed to load image', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

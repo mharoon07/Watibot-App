@@ -204,7 +204,7 @@ class ConversationTile extends StatelessWidget {
         break;
       case MessageStatus.read:
         icon = Icons.done_all;
-        color = const Color(0xFF3B82F6); // Blue ticks
+        color = const Color(0xFF34B7F1); // WhatsApp bright blue double tick
         break;
       default:
         return const SizedBox.shrink();
@@ -223,15 +223,18 @@ class ConversationTile extends StatelessWidget {
     final messageDate = DateTime(time.year, time.month, time.day);
 
     if (messageDate == today) {
-      return '${time.hour > 12 ? time.hour - 12 : time.hour}:${time.minute.toString().padLeft(2, '0')} ${time.hour >= 12 ? 'PM' : 'AM'}';
+      final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+      final minute = time.minute.toString().padLeft(2, '0');
+      final period = time.hour >= 12 ? 'PM' : 'AM';
+      return '$hour:$minute $period';
     } else if (messageDate == yesterday) {
       return 'Yesterday';
     } else {
-      final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       if (now.difference(time).inDays < 7) {
         return days[time.weekday - 1];
       }
-      return '${time.month}/${time.day}/${time.year}';
+      return '${time.day.toString().padLeft(2, '0')}/${time.month.toString().padLeft(2, '0')}/${time.year}';
     }
   }
 }

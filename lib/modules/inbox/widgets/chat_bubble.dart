@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,7 @@ import 'package:watibot/modules/inbox/widgets/audio_player_widget.dart';
 import 'package:watibot/modules/inbox/routes/inbox_routes.dart';
 import 'package:watibot/modules/inbox/widgets/inline_video_player.dart';
 import 'package:watibot/modules/inbox/widgets/lazy_image_widget.dart';
+
 
 class ChatBubble extends StatelessWidget {
   final MessageModel message;
@@ -105,19 +107,15 @@ class ChatBubble extends StatelessWidget {
                 isOutgoing: isOutgoing,
               )
             else if (message.attachmentType == AttachmentType.image && message.attachmentUrl != null)
-              LazyImageWidget(
-                imageUrl: message.attachmentUrl!,
-                onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: message.attachmentUrl!),
-              )
+              _buildImageWidget(message)
             else if (message.content == '[Image]' && message.attachmentUrl != null)
-              LazyImageWidget(
-                imageUrl: message.attachmentUrl!,
-                onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: message.attachmentUrl!),
-              )
+              _buildImageWidget(message)
+
             else if (message.attachmentType == AttachmentType.video && message.attachmentUrl != null)
-              InlineVideoPlayer(videoUrl: message.attachmentUrl!)
+              _buildVideoWidget(message)
             else if (message.content == '[Video]' && message.attachmentUrl != null)
-              InlineVideoPlayer(videoUrl: message.attachmentUrl!)
+              _buildVideoWidget(message)
+
             else if ((message.attachmentType == AttachmentType.document || message.attachmentType == AttachmentType.pdf) && message.attachmentUrl != null)
               GestureDetector(
                 onTap: () => _launchUrl(message.attachmentUrl!),
@@ -234,16 +232,18 @@ class ChatBubble extends StatelessWidget {
         break;
       case MessageStatus.read:
         icon = Icons.done_all;
-        color = const Color(0xFF3B82F6);
+        color = const Color(0xFF34B7F1); // WhatsApp bright blue double tick
         break;
     }
-
 
     return Icon(icon, size: 14, color: color);
   }
 
   String _formatTime(DateTime time) {
-    return '${time.hour > 12 ? time.hour - 12 : time.hour}:${time.minute.toString().padLeft(2, '0')} ${time.hour >= 12 ? 'PM' : 'AM'}';
+    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 
   Future<void> _launchUrl(String url) async {
@@ -263,4 +263,123 @@ class ChatBubble extends StatelessWidget {
       debugPrint('Failed to launch url: $e');
     }
   }
+
+  Widget _buildImageWidget(MessageModel message) {
+    final url = message.attachmentUrl!;
+    final bool isLocal = !url.startsWith('http://') && !url.startsWith('https://');
+
+    Widget imageWidget;
+    if (isLocal) {
+      imageWidget = GestureDetector(
+        onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: url),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 250),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(
+              File(url),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+            ),
+          ),
+        ),
+      );
+    } else {
+      imageWidget = LazyImageWidget(
+        imageUrl: url,
+        onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: url),
+      );
+    }
+
+    if (message.status == MessageStatus.none) {
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          imageWidget,
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.black87,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CircularProgressIndicator(
+                    value: message.uploadProgress > 0 ? message.uploadProgress : null,
+                    color: const Color(0xFF00B074),
+                    strokeWidth: 3,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return imageWidget;
+  }
+
+  Widget _buildVideoWidget(MessageModel message) {
+    final url = message.attachmentUrl;
+    if (url == null || url.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final videoWidget = InlineVideoPlayer(videoUrl: url);
+
+    if (message.status == MessageStatus.none) {
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            height: 160,
+            width: 240,
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(
+              child: Icon(Icons.videocam, size: 48, color: Colors.white24),
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.black87,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CircularProgressIndicator(
+                    value: message.uploadProgress > 0 ? message.uploadProgress : null,
+                    color: const Color(0xFF00B074),
+                    strokeWidth: 3,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return videoWidget;
+  }
 }
+
+

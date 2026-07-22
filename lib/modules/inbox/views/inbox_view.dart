@@ -6,6 +6,8 @@ import 'package:watibot/modules/inbox/controllers/inbox_controller.dart';
 import 'package:watibot/modules/inbox/widgets/filter_chip_list.dart';
 import 'package:watibot/modules/inbox/widgets/conversation_tile.dart';
 
+import 'package:watibot/modules/inbox/widgets/inbox_skeleton.dart';
+
 class InboxView extends GetView<InboxController> {
   const InboxView({super.key});
 
@@ -23,8 +25,8 @@ class InboxView extends GetView<InboxController> {
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+              if (controller.isLoading.value && controller.filteredConversations.isEmpty) {
+                return const InboxSkeleton();
               }
 
               if (controller.filteredConversations.isEmpty) {

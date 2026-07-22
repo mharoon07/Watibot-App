@@ -134,7 +134,8 @@ class InboxRepository {
   }) async {
     final payload = {
       'contact_id': contactId,
-      if (message != null && message.isNotEmpty) 'message': message,
+      'message': message ?? '',
+
       if (mediaUrl != null && mediaUrl.isNotEmpty) 'media_url': mediaUrl,
       if (contentType != null && contentType.isNotEmpty) 'content_type': contentType,
       if (templateName != null && templateName.isNotEmpty) 'template_name': templateName,

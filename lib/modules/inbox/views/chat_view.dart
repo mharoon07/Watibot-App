@@ -10,20 +10,22 @@ import 'package:watibot/modules/inbox/widgets/message_input.dart';
 import 'package:watibot/modules/inbox/widgets/system_event_chip.dart';
 import 'package:watibot/modules/inbox/widgets/typing_indicator.dart';
 
+import 'package:watibot/modules/inbox/widgets/chat_skeleton.dart';
+
 class ChatView extends GetView<ChatController> {
   const ChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slight off-white background like WhatsApp
+      backgroundColor: const Color(0xFFE5DDD5), // Classic WhatsApp wallpaper tint background
       appBar: ChatAppBar(conversation: controller.conversation),
       body: Column(
         children: [
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+              if (controller.isLoading.value && controller.messages.isEmpty) {
+                return const ChatSkeleton();
               }
 
               return ListView.builder(
