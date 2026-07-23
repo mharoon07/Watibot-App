@@ -69,12 +69,16 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
       final double ratio = _videoPlayerController!.value.aspectRatio > 0
           ? _videoPlayerController!.value.aspectRatio
           : 16 / 9;
+      
+      // Ensure the aspect ratio is at least 0.8 to prevent UI overflow on narrow portrait videos
+      final double displayRatio = ratio < 0.8 ? 0.8 : ratio;
 
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController!,
         autoPlay: false,
         looping: false,
-        aspectRatio: ratio,
+        aspectRatio: displayRatio,
+        allowPlaybackSpeedChanging: false,
         materialProgressColors: ChewieProgressColors(
           playedColor: AppTheme.primaryColor,
           handleColor: AppTheme.primaryColor,
@@ -191,12 +195,17 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
       );
     }
 
+    final double ratio = _videoPlayerController!.value.aspectRatio > 0
+        ? _videoPlayerController!.value.aspectRatio
+        : 16 / 9;
+    final double displayRatio = ratio < 0.8 ? 0.8 : ratio;
+
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: AspectRatio(
-          aspectRatio: _videoPlayerController!.value.aspectRatio,
+          aspectRatio: displayRatio,
           child: Chewie(
             controller: _chewieController!,
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:watibot/core/services/storage_service.dart';
 import 'package:watibot/modules/notifications/models/notification_model.dart';
@@ -34,10 +35,8 @@ class NotificationsController extends GetxController {
       notifications.value = List<NotificationItemModel>.from(res['notifications']);
       summary.value = List<NotificationModuleSummaryModel>.from(res['summary']);
       
-      // Calculate unread items
-      final lastRead = _lastReadAt ?? 0;
-      final unreadItems = notifications.where((n) => (n.createdAt ?? 0) > lastRead).length;
-      unreadCount.value = unreadItems;
+      // Calculate unread items from API
+      unreadCount.value = res['unread_count'] ?? 0;
     }
   }
 
@@ -46,25 +45,52 @@ class NotificationsController extends GetxController {
     fetchNotifications();
   }
 
-  void markAllAsRead() {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    _storage.setInt('notifications_last_read_at', now);
-
-
+  Future<void> markAllAsRead() async {
+    // Optimistic UI Update
     for (var item in notifications) {
       item.isRead = true;
     }
-    notifications.refresh();
+    final previousUnread = unreadCount.value;
     unreadCount.value = 0;
-    Get.snackbar('Notifications', 'All notifications marked as read', snackPosition: SnackPosition.BOTTOM);
+    notifications.refresh();
+
+    // API Call
+    final res = await _repository.markAsRead(markAll: true);
+    
+    if (res['success'] == true) {
+      // Legacy fallback just in case
+      final now = DateTime.now().millisecondsSinceEpoch;
+      _storage.setInt('notifications_last_read_at', now);
+      Get.snackbar('Notifications', 'All notifications marked as read', snackPosition: SnackPosition.BOTTOM);
+    } else {
+      // Revert Optimistic Update
+      for (var item in notifications) {
+        item.isRead = false; // Note: In a real app we'd keep track of what was read before, but marking all as unread is safer here if it fails
+      }
+      unreadCount.value = previousUnread;
+      notifications.refresh();
+      Get.snackbar('Error', res['error'] ?? 'Failed to mark notifications as read', snackPosition: SnackPosition.BOTTOM, backgroundColor: Color(0xFFFEF2F2), colorText: Color(0xFF991B1B));
+    }
   }
 
-  void markAsRead(String id) {
+  Future<void> markAsRead(String id) async {
     final index = notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      notifications[index].isRead = true;
+    if (index == -1 || notifications[index].isRead) return;
+
+    // Optimistic UI Update
+    notifications[index].isRead = true;
+    notifications.refresh();
+    if (unreadCount.value > 0) unreadCount.value--;
+
+    // API Call
+    final res = await _repository.markAsRead(id: id);
+    
+    if (res['success'] != true) {
+      // Revert Optimistic Update
+      notifications[index].isRead = false;
       notifications.refresh();
-      if (unreadCount.value > 0) unreadCount.value--;
+      unreadCount.value++;
+      Get.snackbar('Error', res['error'] ?? 'Failed to mark notification as read', snackPosition: SnackPosition.BOTTOM, backgroundColor: Color(0xFFFEF2F2), colorText: Color(0xFF991B1B));
     }
   }
 }

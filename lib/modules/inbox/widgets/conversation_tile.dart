@@ -216,7 +216,8 @@ class ConversationTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime time) {
+  String _formatTime(DateTime utcTime) {
+    final time = utcTime.toLocal();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));

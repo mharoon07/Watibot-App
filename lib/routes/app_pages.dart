@@ -31,6 +31,7 @@ import 'package:watibot/modules/templates/views/templates_view.dart';
 import 'package:watibot/modules/templates/views/template_details_view.dart';
 import 'package:watibot/modules/templates/views/create_template_view.dart';
 import 'package:watibot/modules/templates/bindings/templates_binding.dart';
+import 'package:watibot/modules/templates/bindings/create_template_binding.dart';
 import 'package:watibot/modules/media_library/routes/media_library_routes.dart';
 import 'package:watibot/modules/media_library/views/media_library_view.dart';
 import 'package:watibot/modules/media_library/bindings/media_library_binding.dart';
@@ -179,6 +180,7 @@ class AppPages {
     GetPage(
       name: TemplatesRoutes.createTemplate,
       page: () => const CreateTemplateView(),
+      binding: CreateTemplateBinding(),
       transition: Transition.rightToLeft,
     ),
     GetPage(

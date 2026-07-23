@@ -64,7 +64,62 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-
+      actions: [
+        if (conversation.handledByAi)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.auto_awesome, size: 14, color: Color(0xFF10B981)),
+                const SizedBox(width: 4),
+                Text(
+                  'AI',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF10B981),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (conversation.assignedAgent != null && conversation.assignedAgent!.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(left: 4, right: 12, top: 14, bottom: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3B82F6).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.person, size: 14, color: Color(0xFF3B82F6)),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    conversation.assignedAgent!,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF3B82F6),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          const SizedBox(width: 12),
+      ],
     );
   }
 

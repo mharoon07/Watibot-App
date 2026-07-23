@@ -32,7 +32,12 @@ class NotificationItemModel {
   factory NotificationItemModel.fromJson(Map<String, dynamic> json, {int? lastReadAt}) {
     final createdTime = json['created_at'] is int ? json['created_at'] as int : null;
     bool read = false;
-    if (lastReadAt != null && createdTime != null) {
+    
+    // Use the backend provided is_read flag if available
+    if (json.containsKey('is_read')) {
+      read = json['is_read'] == true;
+    } else if (lastReadAt != null && createdTime != null) {
+      // Fallback to legacy lastReadAt logic
       read = createdTime <= lastReadAt;
     }
 

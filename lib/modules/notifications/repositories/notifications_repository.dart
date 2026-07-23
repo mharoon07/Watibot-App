@@ -45,4 +45,26 @@ class NotificationsRepository {
       return {'success': false, 'error': ApiService.extractErrorMessage(e, 'Failed to fetch notifications'), 'notifications': <NotificationItemModel>[], 'summary': <NotificationModuleSummaryModel>[], 'total': 0};
     }
   }
+
+  Future<Map<String, dynamic>> markAsRead({String? id, bool markAll = false}) async {
+    try {
+      final data = <String, dynamic>{};
+      if (markAll) {
+        data['mark_all'] = true;
+      } else if (id != null) {
+        data['id'] = id;
+      } else {
+        return {'success': false, 'error': 'Invalid arguments'};
+      }
+
+      final response = await _apiService.put('/notifications', data: data);
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic> && responseData['success'] == true) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': 'Failed to mark as read'};
+    } catch (e) {
+      return {'success': false, 'error': ApiService.extractErrorMessage(e, 'Failed to mark as read')};
+    }
+  }
 }

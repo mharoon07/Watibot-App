@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:watibot/core/theme/app_theme.dart';
 import 'package:watibot/modules/inbox/controllers/chat_controller.dart';
+import 'package:watibot/modules/inbox/widgets/send_template_dialog.dart';
 
 class MessageInput extends StatelessWidget {
   final ChatController chatController;
@@ -401,91 +402,19 @@ class MessageInput extends StatelessWidget {
   }
 
   void _showTemplateSelectorDialog(BuildContext context) {
-    String? selectedTemplate;
-    String language = 'en_US';
-
     showDialog(
-
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            final templates = chatController.whatsappTemplates;
-
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: Text('Send WhatsApp Template', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Select Template *', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedTemplate,
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      hint: Text('Select Template', style: GoogleFonts.inter(fontSize: 12)),
-                      items: templates.map((t) {
-                        final name = t['name']?.toString() ?? '';
-                        return DropdownMenuItem(value: name, child: Text(name, style: GoogleFonts.inter(fontSize: 12)));
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setStateDialog(() {
-                            selectedTemplate = val;
-                            final match = templates.firstWhereOrNull((t) => t['name'] == val);
-                            if (match != null && match['language'] != null) {
-                              language = match['language'].toString();
-                            }
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Text('Language Code', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: TextEditingController(text: language),
-                      style: GoogleFonts.inter(fontSize: 12),
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onChanged: (val) => language = val,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('Cancel', style: GoogleFonts.inter(color: const Color(0xFF64748B))),
-                ),
-                ElevatedButton(
-                  onPressed: selectedTemplate == null
-                      ? null
-                      : () {
-                          Navigator.pop(ctx);
-                          chatController.sendWhatsAppTemplate(
-                            templateName: selectedTemplate!,
-                            language: language,
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: Text('Send Template', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (ctx) => SendTemplateDialog(
+        templates: chatController.whatsappTemplates,
+        onSend: (templateName, language, params, headerUrl) {
+          chatController.sendWhatsAppTemplate(
+            templateName: templateName,
+            language: language,
+            parameters: params,
+            headerMediaUrl: headerUrl,
+          );
+        },
+      ),
     );
   }
 }

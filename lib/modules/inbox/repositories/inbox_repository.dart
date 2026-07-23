@@ -53,6 +53,7 @@ class InboxRepository {
         'contact_id': contactId,
         'message_page': messagePage,
         'message_limit': messageLimit,
+        'messages_only': 'true',
         'limit': 1, // Minimize payload size since we only care about messages
       };
 
@@ -157,8 +158,11 @@ class InboxRepository {
     try {
       final response = await _apiService.get('/quick-replies');
       final data = response.data;
-      if (data != null && data['data'] is List) {
-        return (data['data'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      if (data != null) {
+        final rawList = data['data'] ?? data['quick_replies'] ?? data['quickReplies'] ?? [];
+        if (rawList is List) {
+          return rawList.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        }
       }
       return [];
     } catch (_) {

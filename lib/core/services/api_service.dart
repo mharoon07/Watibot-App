@@ -142,6 +142,23 @@ class ApiService extends GetxService {
       }
     }
   }
+
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      final response = await _dio.put(path, data: data);
+      return response;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final msg = extractErrorMessage(e.response?.data, e.message ?? 'Unknown error occurred');
+        throw ApiException(
+          message: msg,
+          statusCode: e.response?.statusCode,
+        );
+      } else {
+        throw ApiException(message: 'Network error: ${e.message}');
+      }
+    }
+  }
 }
 
 

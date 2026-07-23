@@ -30,7 +30,8 @@ class DateSeparator extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
+  String _formatDate(DateTime utcDate) {
+    final d = utcDate.toLocal();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));

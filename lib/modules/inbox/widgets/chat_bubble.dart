@@ -10,7 +10,8 @@ import 'package:watibot/modules/inbox/widgets/audio_player_widget.dart';
 import 'package:watibot/modules/inbox/routes/inbox_routes.dart';
 import 'package:watibot/modules/inbox/widgets/inline_video_player.dart';
 import 'package:watibot/modules/inbox/widgets/lazy_image_widget.dart';
-
+import 'package:watibot/modules/inbox/widgets/cached_media_wrapper.dart';
+import 'package:open_filex/open_filex.dart';
 
 class ChatBubble extends StatelessWidget {
   final MessageModel message;
@@ -117,69 +118,9 @@ class ChatBubble extends StatelessWidget {
               _buildVideoWidget(message)
 
             else if ((message.attachmentType == AttachmentType.document || message.attachmentType == AttachmentType.pdf) && message.attachmentUrl != null)
-              GestureDetector(
-                onTap: () => _launchUrl(message.attachmentUrl!),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.insert_drive_file, size: 30, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          message.content,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: textColor,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.download, size: 20, color: Colors.grey),
-                    ],
-                  ),
-                ),
-              )
+              _buildDocumentWidget(message)
             else if (message.content.endsWith('.pdf') && message.attachmentUrl != null)
-              GestureDetector(
-                onTap: () => _launchUrl(message.attachmentUrl!),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.insert_drive_file, size: 30, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          message.content,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: textColor,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.download, size: 20, color: Colors.grey),
-                    ],
-                  ),
-                ),
-              )
+              _buildDocumentWidget(message)
             else
               Text(
                 message.content,
@@ -239,7 +180,8 @@ class ChatBubble extends StatelessWidget {
     return Icon(icon, size: 14, color: color);
   }
 
-  String _formatTime(DateTime time) {
+  String _formatTime(DateTime utcTime) {
+    final time = utcTime.toLocal();
     final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
     final minute = time.minute.toString().padLeft(2, '0');
     final period = time.hour >= 12 ? 'PM' : 'AM';
@@ -265,33 +207,26 @@ class ChatBubble extends StatelessWidget {
   }
 
   Widget _buildImageWidget(MessageModel message) {
-    final url = message.attachmentUrl!;
-    final bool isLocal = !url.startsWith('http://') && !url.startsWith('https://');
-
-    Widget imageWidget;
-    if (isLocal) {
-      imageWidget = GestureDetector(
-        onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: url),
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 250),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(url),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+    if (message.status == MessageStatus.none && message.uploadProgress > 0 && message.uploadProgress < 1.0) {
+      // Handling upload state logic ...
+      final url = message.attachmentUrl!;
+      final bool isLocal = !url.startsWith('http://') && !url.startsWith('https://');
+      Widget imageWidget;
+      if (isLocal) {
+        imageWidget = Container(
+            constraints: const BoxConstraints(maxHeight: 250),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                File(url),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+              ),
             ),
-          ),
-        ),
-      );
-    } else {
-      imageWidget = LazyImageWidget(
-        imageUrl: url,
-        onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: url),
-      );
-    }
-
-    if (message.status == MessageStatus.none) {
+          );
+      } else {
+        imageWidget = Container(color: Colors.black87, height: 250);
+      }
       return Stack(
         alignment: Alignment.center,
         children: [
@@ -324,18 +259,45 @@ class ChatBubble extends StatelessWidget {
       );
     }
 
-    return imageWidget;
+    return CachedMediaWrapper(
+      message: message,
+      icon: const Icon(Icons.image, size: 64, color: Colors.white24),
+      label: 'Download Image',
+      builder: (localPath) {
+        return GestureDetector(
+          onTap: () => Get.toNamed(InboxRoutes.imagePreview, arguments: localPath),
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 250, minHeight: 120),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                File(localPath),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 150,
+                  width: 200,
+                  color: const Color(0xFFF1F5F9),
+                  child: const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.broken_image, size: 36, color: Color(0xFF94A3B8)),
+                        SizedBox(height: 6),
+                        Text('Failed to load image', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildVideoWidget(MessageModel message) {
-    final url = message.attachmentUrl;
-    if (url == null || url.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final videoWidget = InlineVideoPlayer(videoUrl: url);
-
-    if (message.status == MessageStatus.none) {
+    if (message.status == MessageStatus.none && message.uploadProgress > 0 && message.uploadProgress < 1.0) {
       return Stack(
         alignment: Alignment.center,
         children: [
@@ -378,7 +340,55 @@ class ChatBubble extends StatelessWidget {
       );
     }
 
-    return videoWidget;
+    return CachedMediaWrapper(
+      message: message,
+      icon: const Icon(Icons.videocam, size: 64, color: Colors.white24),
+      label: 'Download Video',
+      builder: (localPath) {
+        return InlineVideoPlayer(videoUrl: localPath);
+      },
+    );
+  }
+
+  Widget _buildDocumentWidget(MessageModel message) {
+    final textColor = AppTheme.textPrimary;
+    
+    return CachedMediaWrapper(
+      message: message,
+      icon: const Icon(Icons.insert_drive_file, size: 64, color: Colors.white24),
+      label: 'Download Document',
+      builder: (localPath) {
+        return GestureDetector(
+          onTap: () => OpenFilex.open(localPath),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.insert_drive_file, size: 30, color: Colors.grey),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    message.content,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: textColor,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

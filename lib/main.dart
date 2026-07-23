@@ -5,6 +5,7 @@ import 'package:watibot/core/services/api_service.dart';
 import 'package:watibot/core/services/storage_service.dart';
 
 import 'package:watibot/core/services/media_cache_service.dart';
+import 'package:watibot/core/services/media_download_manager.dart';
 import 'package:watibot/core/services/chat_cache_service.dart';
 
 void main() async {
@@ -13,6 +14,7 @@ void main() async {
     await Get.putAsync(() => StorageService().init());
     await Get.putAsync(() => ApiService().init());
     await Get.putAsync(() => MediaCacheService().init());
+    Get.put(MediaDownloadManager());
     await Get.putAsync(() => ChatCacheService().init());
   } catch (e) {
     debugPrint('Service init error: $e');

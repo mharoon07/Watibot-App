@@ -58,10 +58,12 @@ class ChatController extends GetxController {
     if (cached.isNotEmpty) {
       messages.assignAll(cached);
       isLoading.value = false;
+    } else if (conversation.lastMessage != null) {
+      messages.add(conversation.lastMessage!);
     }
 
     // Fetch latest messages from CRM in background
-    fetchMessages(silent: cached.isNotEmpty);
+    fetchMessages(silent: messages.isNotEmpty);
     _markChatAsRead();
 
     scrollController.addListener(_onScroll);
@@ -573,6 +575,7 @@ class ChatController extends GetxController {
     required String templateName,
     required String language,
     List<dynamic>? parameters,
+    String? headerMediaUrl,
   }) async {
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final tempMsg = MessageModel(
@@ -587,20 +590,43 @@ class ChatController extends GetxController {
     _scrollToBottom();
 
     try {
-      final components = parameters != null && parameters.isNotEmpty
-          ? [
-              {
-                'type': 'body',
-                'parameters': parameters.map((val) => {'type': 'text', 'text': val.toString()}).toList(),
-              }
-            ]
-          : null;
+      final List<Map<String, dynamic>> components = [];
+      
+      if (headerMediaUrl != null && headerMediaUrl.isNotEmpty) {
+        final template = whatsappTemplates.firstWhereOrNull((t) => t['name'] == templateName);
+        if (template != null) {
+          final headerComp = (template['components'] as List?)?.firstWhereOrNull((c) => c['type'] == 'HEADER');
+          if (headerComp != null) {
+            final format = headerComp['format']?.toString().toLowerCase();
+            if (format == 'image' || format == 'video' || format == 'document') {
+              components.add({
+                'type': 'header',
+                'parameters': [
+                  {
+                    'type': format,
+                    format: {'link': headerMediaUrl}
+                  }
+                ]
+              });
+            }
+          }
+        }
+      }
+
+      if (parameters != null && parameters.isNotEmpty) {
+        components.add({
+          'type': 'body',
+          'parameters': parameters.map((val) => {'type': 'text', 'text': val.toString()}).toList(),
+        });
+      }
+
+      final payloadComponents = components.isEmpty ? null : components;
 
       final sentMsg = await _repository.sendLiveChatMessage(
         contactId: conversation.id,
         templateName: templateName,
         templateLanguage: language,
-        components: components,
+        components: payloadComponents,
       );
 
       final index = messages.indexWhere((m) => m.id == tempId);
